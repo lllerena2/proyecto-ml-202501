@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -60,10 +60,11 @@
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/Benchmark de Modelos';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/Benchmark-Modelos';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Exploratory Data Analysis" href="EDA.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -114,8 +115,6 @@
     <div class="bd-container__inner bd-page-width">
       
       
-      
-        
       
       <dialog id="pst-primary-sidebar-modal"></dialog>
       <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
@@ -169,11 +168,9 @@
                 </a>
             </li>
         </ul>
-        <ul class="nav bd-sidenav">
+        <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="EDA.html">Exploratory Data Analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown.html">Markdown Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Content with notebooks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-notebooks.html">Notebooks with MyST Markdown</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Evaluación de modelos benchmark</a></li>
 </ul>
 
     </div>
@@ -245,7 +242,7 @@
       
       
       
-      <li><a href="https://github.com/executablebooks/jupyter-book/issues/new?title=Issue%20on%20page%20%2Fchapters/Benchmark de Modelos.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/executablebooks/jupyter-book/issues/new?title=Issue%20on%20page%20%2Fchapters/Benchmark-Modelos.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -275,7 +272,7 @@
       
       
       
-      <li><a href="../_sources/chapters/Benchmark de Modelos.ipynb" target="_blank"
+      <li><a href="../_sources/chapters/Benchmark-Modelos.ipynb" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -493,7 +490,7 @@
 <p>En esta capítulo de presenta el benchmark de los siguientes modelos:</p>
 <ul class="simple">
 <li><p>KNN</p></li>
-<li><p>Clasificación de Bayes,</p></li>
+<li><p>Clasificación de Bayes</p></li>
 <li><p>Regresión Logística (Regularización L1/L2)</p></li>
 <li><p>Decision Tree</p></li>
 <li><p>Random Forest</p></li>
@@ -607,8 +604,8 @@
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">knn_param_grid</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;n_neighbors&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
-    <span class="c1">#&#39;algorithm&#39;: [&#39;ball_tree&#39;, &#39;kd_tree&#39;]</span>
+    <span class="s1">&#39;n_neighbors&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+    <span class="s1">&#39;algorithm&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;ball_tree&#39;</span><span class="p">,</span> <span class="s1">&#39;kd_tree&#39;</span><span class="p">,</span> <span class="s1">&#39;faiss&#39;</span><span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -628,234 +625,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 2 candidates, totalling 10 fits
-</pre></div>
-</div>
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">KeyboardInterrupt</span><span class="g g-Whitespace">                         </span>Traceback (most recent call last)
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\parallel.py:1650,</span> in <span class="ni">Parallel._get_outputs</span><span class="nt">(self, iterator, pre_dispatch)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1649</span>     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">retrieval_context</span><span class="p">():</span>
-<span class="ne">-&gt; </span><span class="mi">1650</span>         <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve</span><span class="p">()</span>
-<span class="g g-Whitespace">   </span><span class="mi">1652</span> <span class="k">except</span> <span class="ne">GeneratorExit</span><span class="p">:</span>
-<span class="g g-Whitespace">   </span><span class="mi">1653</span>     <span class="c1"># The generator has been garbage collected before being fully</span>
-<span class="g g-Whitespace">   </span><span class="mi">1654</span>     <span class="c1"># consumed. This aborts the remaining tasks if possible and warn</span>
-<span class="g g-Whitespace">   </span><span class="mi">1655</span>     <span class="c1"># the user if necessary.</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\parallel.py:1762,</span> in <span class="ni">Parallel._retrieve</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1759</span> <span class="k">if</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_jobs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span>
-<span class="g g-Whitespace">   </span><span class="mi">1760</span>     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_jobs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_status</span><span class="p">(</span>
-<span class="g g-Whitespace">   </span><span class="mi">1761</span>         <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span> <span class="o">==</span> <span class="n">TASK_PENDING</span><span class="p">)):</span>
-<span class="ne">-&gt; </span><span class="mi">1762</span>     <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1763</span>     <span class="k">continue</span>
-
-<span class="ne">KeyboardInterrupt</span>: 
-
-<span class="n">During</span> <span class="n">handling</span> <span class="n">of</span> <span class="n">the</span> <span class="n">above</span> <span class="n">exception</span><span class="p">,</span> <span class="n">another</span> <span class="n">exception</span> <span class="n">occurred</span><span class="p">:</span>
-
-<span class="ne">OSError</span><span class="g g-Whitespace">                                   </span>Traceback (most recent call last)
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_search.py:1019,</span> in <span class="ni">BaseSearchCV.fit</span><span class="nt">(self, X, y, **params)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1017</span>     <span class="k">return</span> <span class="n">results</span>
-<span class="ne">-&gt; </span><span class="mi">1019</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_search</span><span class="p">(</span><span class="n">evaluate_candidates</span><span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1021</span> <span class="c1"># multimetric is determined here because in the case of a callable</span>
-<span class="g g-Whitespace">   </span><span class="mi">1022</span> <span class="c1"># self.scoring the return type is only known after calling</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_search.py:1573,</span> in <span class="ni">GridSearchCV._run_search</span><span class="nt">(self, evaluate_candidates)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1572</span><span class="w"> </span><span class="sd">&quot;&quot;&quot;Search all candidates in param_grid&quot;&quot;&quot;</span>
-<span class="ne">-&gt; </span><span class="mi">1573</span> <span class="n">evaluate_candidates</span><span class="p">(</span><span class="n">ParameterGrid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_grid</span><span class="p">))</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_search.py:965,</span> in <span class="ni">BaseSearchCV.fit.&lt;locals&gt;.evaluate_candidates</span><span class="nt">(candidate_params, cv, more_results)</span>
-<span class="g g-Whitespace">    </span><span class="mi">958</span>     <span class="nb">print</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">959</span>         <span class="s2">&quot;Fitting </span><span class="si">{0}</span><span class="s2"> folds for each of </span><span class="si">{1}</span><span class="s2"> candidates,&quot;</span>
-<span class="g g-Whitespace">    </span><span class="mi">960</span>         <span class="s2">&quot; totalling </span><span class="si">{2}</span><span class="s2"> fits&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">961</span>             <span class="n">n_splits</span><span class="p">,</span> <span class="n">n_candidates</span><span class="p">,</span> <span class="n">n_candidates</span> <span class="o">*</span> <span class="n">n_splits</span>
-<span class="g g-Whitespace">    </span><span class="mi">962</span>         <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">963</span>     <span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">965</span> <span class="n">out</span> <span class="o">=</span> <span class="n">parallel</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">966</span>     <span class="n">delayed</span><span class="p">(</span><span class="n">_fit_and_score</span><span class="p">)(</span>
-<span class="g g-Whitespace">    </span><span class="mi">967</span>         <span class="n">clone</span><span class="p">(</span><span class="n">base_estimator</span><span class="p">),</span>
-<span class="g g-Whitespace">    </span><span class="mi">968</span>         <span class="n">X</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">969</span>         <span class="n">y</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">970</span>         <span class="n">train</span><span class="o">=</span><span class="n">train</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">971</span>         <span class="n">test</span><span class="o">=</span><span class="n">test</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">972</span>         <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">973</span>         <span class="n">split_progress</span><span class="o">=</span><span class="p">(</span><span class="n">split_idx</span><span class="p">,</span> <span class="n">n_splits</span><span class="p">),</span>
-<span class="g g-Whitespace">    </span><span class="mi">974</span>         <span class="n">candidate_progress</span><span class="o">=</span><span class="p">(</span><span class="n">cand_idx</span><span class="p">,</span> <span class="n">n_candidates</span><span class="p">),</span>
-<span class="g g-Whitespace">    </span><span class="mi">975</span>         <span class="o">**</span><span class="n">fit_and_score_kwargs</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">976</span>     <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">977</span>     <span class="k">for</span> <span class="p">(</span><span class="n">cand_idx</span><span class="p">,</span> <span class="n">parameters</span><span class="p">),</span> <span class="p">(</span><span class="n">split_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">))</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">978</span>         <span class="nb">enumerate</span><span class="p">(</span><span class="n">candidate_params</span><span class="p">),</span>
-<span class="g g-Whitespace">    </span><span class="mi">979</span>         <span class="nb">enumerate</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">routed_params</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">split</span><span class="p">)),</span>
-<span class="g g-Whitespace">    </span><span class="mi">980</span>     <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">981</span> <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">983</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\sklearn\utils\parallel.py:74,</span> in <span class="ni">Parallel.__call__</span><span class="nt">(self, iterable)</span>
-<span class="g g-Whitespace">     </span><span class="mi">70</span> <span class="n">iterable_with_config</span> <span class="o">=</span> <span class="p">(</span>
-<span class="g g-Whitespace">     </span><span class="mi">71</span>     <span class="p">(</span><span class="n">_with_config</span><span class="p">(</span><span class="n">delayed_func</span><span class="p">,</span> <span class="n">config</span><span class="p">),</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">72</span>     <span class="k">for</span> <span class="n">delayed_func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span> <span class="ow">in</span> <span class="n">iterable</span>
-<span class="g g-Whitespace">     </span><span class="mi">73</span> <span class="p">)</span>
-<span class="ne">---&gt; </span><span class="mi">74</span> <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">iterable_with_config</span><span class="p">)</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\parallel.py:2007,</span> in <span class="ni">Parallel.__call__</span><span class="nt">(self, iterable)</span>
-<span class="g g-Whitespace">   </span><span class="mi">2005</span> <span class="nb">next</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-<span class="ne">-&gt; </span><span class="mi">2007</span> <span class="k">return</span> <span class="n">output</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_generator</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\parallel.py:1703,</span> in <span class="ni">Parallel._get_outputs</span><span class="nt">(self, iterator, pre_dispatch)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1702</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="ne">-&gt; </span><span class="mi">1703</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abort</span><span class="p">()</span>
-<span class="g g-Whitespace">   </span><span class="mi">1704</span> <span class="k">raise</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\parallel.py:1614,</span> in <span class="ni">Parallel._abort</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1613</span>     <span class="n">ensure_ready</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_managed_backend</span>
-<span class="ne">-&gt; </span><span class="mi">1614</span>     <span class="n">backend</span><span class="o">.</span><span class="n">abort_everything</span><span class="p">(</span><span class="n">ensure_ready</span><span class="o">=</span><span class="n">ensure_ready</span><span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1615</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aborted</span> <span class="o">=</span> <span class="kc">True</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\_parallel_backends.py:620,</span> in <span class="ni">LokyBackend.abort_everything</span><span class="nt">(self, ensure_ready)</span>
-<span class="g g-Whitespace">    </span><span class="mi">618</span><span class="w"> </span><span class="sd">&quot;&quot;&quot;Shutdown the workers and restart a new one with the same parameters</span>
-<span class="g g-Whitespace">    </span><span class="mi">619</span><span class="sd"> &quot;&quot;&quot;</span>
-<span class="ne">--&gt; </span><span class="mi">620</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span><span class="o">.</span><span class="n">terminate</span><span class="p">(</span><span class="n">kill_workers</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">621</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span> <span class="o">=</span> <span class="kc">None</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\executor.py:87,</span> in <span class="ni">MemmappingExecutor.terminate</span><span class="nt">(self, kill_workers)</span>
-<span class="g g-Whitespace">     </span><span class="mi">86</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_submit_resize_lock</span><span class="p">:</span>
-<span class="ne">---&gt; </span><span class="mi">87</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_temp_folder_manager</span><span class="o">.</span><span class="n">_clean_temporary_resources</span><span class="p">(</span>
-<span class="g g-Whitespace">     </span><span class="mi">88</span>         <span class="n">force</span><span class="o">=</span><span class="n">kill_workers</span><span class="p">,</span> <span class="n">allow_non_empty</span><span class="o">=</span><span class="kc">True</span>
-<span class="g g-Whitespace">     </span><span class="mi">89</span>     <span class="p">)</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\_memmapping_reducer.py:615,</span> in <span class="ni">TemporaryResourcesManager._clean_temporary_resources</span><span class="nt">(self, context_id, force, allow_non_empty)</span>
-<span class="g g-Whitespace">    </span><span class="mi">614</span>     <span class="k">for</span> <span class="n">context_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cached_temp_folders</span><span class="p">):</span>
-<span class="ne">--&gt; </span><span class="mi">615</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_clean_temporary_resources</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">616</span>             <span class="n">context_id</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span> <span class="n">allow_non_empty</span><span class="o">=</span><span class="n">allow_non_empty</span>
-<span class="g g-Whitespace">    </span><span class="mi">617</span>         <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">618</span> <span class="k">else</span><span class="p">:</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\_memmapping_reducer.py:626,</span> in <span class="ni">TemporaryResourcesManager._clean_temporary_resources</span><span class="nt">(self, context_id, force, allow_non_empty)</span>
-<span class="g g-Whitespace">    </span><span class="mi">622</span> <span class="k">if</span> <span class="n">force</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">623</span>     <span class="c1"># Some workers have failed and the ref counted might</span>
-<span class="g g-Whitespace">    </span><span class="mi">624</span>     <span class="c1"># be off. The workers should have shut down by this</span>
-<span class="g g-Whitespace">    </span><span class="mi">625</span>     <span class="c1"># time so forcefully clean up the files.</span>
-<span class="ne">--&gt; </span><span class="mi">626</span>     <span class="n">resource_tracker</span><span class="o">.</span><span class="n">unregister</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">627</span>         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp_folder</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="s2">&quot;file&quot;</span>
-<span class="g g-Whitespace">    </span><span class="mi">628</span>     <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">629</span> <span class="k">else</span><span class="p">:</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\externals\loky\backend\resource_tracker.py:183,</span> in <span class="ni">ResourceTracker.unregister</span><span class="nt">(self, name, rtype)</span>
-<span class="g g-Whitespace">    </span><span class="mi">182</span><span class="w"> </span><span class="sd">&quot;&quot;&quot;Unregister a named resource with resource tracker.&quot;&quot;&quot;</span>
-<span class="ne">--&gt; </span><span class="mi">183</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensure_running</span><span class="p">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">184</span> <span class="bp">self</span><span class="o">.</span><span class="n">_send</span><span class="p">(</span><span class="s2">&quot;UNREGISTER&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">rtype</span><span class="p">)</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\externals\loky\backend\resource_tracker.py:95,</span> in <span class="ni">ResourceTracker.ensure_running</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">     </span><span class="mi">93</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<span class="g g-Whitespace">     </span><span class="mi">94</span>     <span class="c1"># resource tracker was launched before, is it still running?</span>
-<span class="ne">---&gt; </span><span class="mi">95</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_alive</span><span class="p">():</span>
-<span class="g g-Whitespace">     </span><span class="mi">96</span>         <span class="c1"># =&gt; still alive</span>
-<span class="g g-Whitespace">     </span><span class="mi">97</span>         <span class="k">return</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\externals\loky\backend\resource_tracker.py:170,</span> in <span class="ni">ResourceTracker._check_alive</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">    </span><span class="mi">169</span> <span class="k">try</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">170</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_send</span><span class="p">(</span><span class="s2">&quot;PROBE&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">171</span> <span class="k">except</span> <span class="ne">BrokenPipeError</span><span class="p">:</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\externals\loky\backend\resource_tracker.py:197,</span> in <span class="ni">ResourceTracker._send</span><span class="nt">(self, cmd, name, rtype)</span>
-<span class="g g-Whitespace">    </span><span class="mi">196</span> <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">rtype</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">197</span> <span class="n">nbytes</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fd</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">198</span> <span class="k">assert</span> <span class="n">nbytes</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-<span class="ne">OSError</span>: [Errno 22] Invalid argument
-
-<span class="n">During</span> <span class="n">handling</span> <span class="n">of</span> <span class="n">the</span> <span class="n">above</span> <span class="n">exception</span><span class="p">,</span> <span class="n">another</span> <span class="n">exception</span> <span class="n">occurred</span><span class="p">:</span>
-
-<span class="ne">OSError</span><span class="g g-Whitespace">                                   </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">line</span> <span class="mi">4</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">knn_grid_search</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">knn</span><span class="p">,</span> <span class="n">knn_param_grid</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">scorer</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="n">refit</span><span class="p">)</span>
-<span class="ne">----&gt; </span><span class="mi">4</span> <span class="n">knn_grid_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="n">training_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py:1473,</span> in <span class="ni">_fit_context.&lt;locals&gt;.decorator.&lt;locals&gt;.wrapper</span><span class="nt">(estimator, *args, **kwargs)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1466</span>     <span class="n">estimator</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">()</span>
-<span class="g g-Whitespace">   </span><span class="mi">1468</span> <span class="k">with</span> <span class="n">config_context</span><span class="p">(</span>
-<span class="g g-Whitespace">   </span><span class="mi">1469</span>     <span class="n">skip_parameter_validation</span><span class="o">=</span><span class="p">(</span>
-<span class="g g-Whitespace">   </span><span class="mi">1470</span>         <span class="n">prefer_skip_nested_validation</span> <span class="ow">or</span> <span class="n">global_skip_validation</span>
-<span class="g g-Whitespace">   </span><span class="mi">1471</span>     <span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1472</span> <span class="p">):</span>
-<span class="ne">-&gt; </span><span class="mi">1473</span>     <span class="k">return</span> <span class="n">fit_method</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_search.py:947,</span> in <span class="ni">BaseSearchCV.fit</span><span class="nt">(self, X, y, **params)</span>
-<span class="g g-Whitespace">    </span><span class="mi">935</span> <span class="n">fit_and_score_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">936</span>     <span class="n">scorer</span><span class="o">=</span><span class="n">scorers</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">937</span>     <span class="n">fit_params</span><span class="o">=</span><span class="n">routed_params</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
-   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">944</span>     <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">945</span> <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">946</span> <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="ne">--&gt; </span><span class="mi">947</span> <span class="k">with</span> <span class="n">parallel</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">948</span>     <span class="n">all_candidate_params</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="g g-Whitespace">    </span><span class="mi">949</span>     <span class="n">all_out</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\parallel.py:1354,</span> in <span class="ni">Parallel.__exit__</span><span class="nt">(self, exc_type, exc_value, traceback)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1352</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_generator</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calling</span><span class="p">:</span>
-<span class="g g-Whitespace">   </span><span class="mi">1353</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_abort</span><span class="p">()</span>
-<span class="ne">-&gt; </span><span class="mi">1354</span> <span class="bp">self</span><span class="o">.</span><span class="n">_terminate_and_reset</span><span class="p">()</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\parallel.py:1386,</span> in <span class="ni">Parallel._terminate_and_reset</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1384</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calling</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="g g-Whitespace">   </span><span class="mi">1385</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_managed_backend</span><span class="p">:</span>
-<span class="ne">-&gt; </span><span class="mi">1386</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\_parallel_backends.py:610,</span> in <span class="ni">LokyBackend.terminate</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">    </span><span class="mi">605</span> <span class="k">def</span> <span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">606</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">607</span>         <span class="c1"># Don&#39;t terminate the workers as we want to reuse them in later</span>
-<span class="g g-Whitespace">    </span><span class="mi">608</span>         <span class="c1"># calls, but cleanup the temporary resources that the Parallel call</span>
-<span class="g g-Whitespace">    </span><span class="mi">609</span>         <span class="c1"># created. This &#39;hack&#39; requires a private, low-level operation.</span>
-<span class="ne">--&gt; </span><span class="mi">610</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span><span class="o">.</span><span class="n">_temp_folder_manager</span><span class="o">.</span><span class="n">_clean_temporary_resources</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">611</span>             <span class="n">context_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span>
-<span class="g g-Whitespace">    </span><span class="mi">612</span>         <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">613</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="g g-Whitespace">    </span><span class="mi">615</span>     <span class="bp">self</span><span class="o">.</span><span class="n">reset_batch_stats</span><span class="p">()</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\_memmapping_reducer.py:630,</span> in <span class="ni">TemporaryResourcesManager._clean_temporary_resources</span><span class="nt">(self, context_id, force, allow_non_empty)</span>
-<span class="g g-Whitespace">    </span><span class="mi">626</span>         <span class="n">resource_tracker</span><span class="o">.</span><span class="n">unregister</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">627</span>             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp_folder</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="s2">&quot;file&quot;</span>
-<span class="g g-Whitespace">    </span><span class="mi">628</span>         <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">629</span>     <span class="k">else</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">630</span>         <span class="n">resource_tracker</span><span class="o">.</span><span class="n">maybe_unlink</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">631</span>             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp_folder</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="s2">&quot;file&quot;</span>
-<span class="g g-Whitespace">    </span><span class="mi">632</span>         <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">634</span> <span class="c1"># When forcing clean-up, try to delete the folder even if some</span>
-<span class="g g-Whitespace">    </span><span class="mi">635</span> <span class="c1"># files are still in it. Otherwise, try to delete the folder</span>
-<span class="g g-Whitespace">    </span><span class="mi">636</span> <span class="n">allow_non_empty</span> <span class="o">|=</span> <span class="n">force</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\externals\loky\backend\resource_tracker.py:188,</span> in <span class="ni">ResourceTracker.maybe_unlink</span><span class="nt">(self, name, rtype)</span>
-<span class="g g-Whitespace">    </span><span class="mi">186</span> <span class="k">def</span> <span class="nf">maybe_unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">rtype</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">187</span><span class="w">     </span><span class="sd">&quot;&quot;&quot;Decrement the refcount of a resource, and delete it if it hits 0&quot;&quot;&quot;</span>
-<span class="ne">--&gt; </span><span class="mi">188</span>     <span class="bp">self</span><span class="o">.</span><span class="n">ensure_running</span><span class="p">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">189</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_send</span><span class="p">(</span><span class="s2">&quot;MAYBE_UNLINK&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">rtype</span><span class="p">)</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\externals\loky\backend\resource_tracker.py:95,</span> in <span class="ni">ResourceTracker.ensure_running</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">     </span><span class="mi">92</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
-<span class="g g-Whitespace">     </span><span class="mi">93</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<span class="g g-Whitespace">     </span><span class="mi">94</span>         <span class="c1"># resource tracker was launched before, is it still running?</span>
-<span class="ne">---&gt; </span><span class="mi">95</span>         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_alive</span><span class="p">():</span>
-<span class="g g-Whitespace">     </span><span class="mi">96</span>             <span class="c1"># =&gt; still alive</span>
-<span class="g g-Whitespace">     </span><span class="mi">97</span>             <span class="k">return</span>
-<span class="g g-Whitespace">     </span><span class="mi">98</span>         <span class="c1"># =&gt; dead, launch it again</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\externals\loky\backend\resource_tracker.py:170,</span> in <span class="ni">ResourceTracker._check_alive</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">    </span><span class="mi">168</span><span class="w"> </span><span class="sd">&quot;&quot;&quot;Check for the existence of the resource tracker process.&quot;&quot;&quot;</span>
-<span class="g g-Whitespace">    </span><span class="mi">169</span> <span class="k">try</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">170</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_send</span><span class="p">(</span><span class="s2">&quot;PROBE&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">171</span> <span class="k">except</span> <span class="ne">BrokenPipeError</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">172</span>     <span class="k">return</span> <span class="kc">False</span>
-
-<span class="nn">File ~\anaconda3\envs\practical-exam\lib\site-packages\joblib\externals\loky\backend\resource_tracker.py:197,</span> in <span class="ni">ResourceTracker._send</span><span class="nt">(self, cmd, name, rtype)</span>
-<span class="g g-Whitespace">    </span><span class="mi">195</span>     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;name too long&quot;</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">196</span> <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">rtype</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">197</span> <span class="n">nbytes</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fd</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">198</span> <span class="k">assert</span> <span class="n">nbytes</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-<span class="ne">OSError</span>: [Errno 22] Invalid argument
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 12 candidates, totalling 60 fits
 </pre></div>
 </div>
 </div>
@@ -906,7 +676,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/49058b131107cbbb5e8efdba9914e85e6a21c629722fda78053dff774ae4c92c.png" src="../_images/49058b131107cbbb5e8efdba9914e85e6a21c629722fda78053dff774ae4c92c.png" />
+<img alt="../_images/4518962e08fa8b0cc73e123f80721cb1f3c0cf0478a860647a72f9ee0920c8f9.png" src="../_images/4518962e08fa8b0cc73e123f80721cb1f3c0cf0478a860647a72f9ee0920c8f9.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -1016,6 +786,7 @@ weighted avg       0.98      0.98      0.98     21892
       <th>std_fit_time</th>
       <th>mean_score_time</th>
       <th>std_score_time</th>
+      <th>param_algorithm</th>
       <th>param_n_neighbors</th>
       <th>params</th>
       <th>split0_test_score</th>
@@ -1031,12 +802,13 @@ weighted avg       0.98      0.98      0.98     21892
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.490621</td>
-      <td>0.047857</td>
-      <td>25.399827</td>
-      <td>0.233998</td>
+      <td>4.854034</td>
+      <td>0.602060</td>
+      <td>867.799731</td>
+      <td>6.329146</td>
+      <td>ball_tree</td>
       <td>1</td>
-      <td>{'n_neighbors': 1}</td>
+      <td>{'algorithm': 'ball_tree', 'n_neighbors': 1}</td>
       <td>0.864455</td>
       <td>0.874834</td>
       <td>0.871268</td>
@@ -1048,12 +820,13 @@ weighted avg       0.98      0.98      0.98     21892
     </tr>
     <tr>
       <th>1</th>
-      <td>0.450722</td>
-      <td>0.073027</td>
-      <td>25.538842</td>
-      <td>0.227330</td>
+      <td>5.787230</td>
+      <td>0.318221</td>
+      <td>916.147086</td>
+      <td>12.684448</td>
+      <td>ball_tree</td>
       <td>3</td>
-      <td>{'n_neighbors': 3}</td>
+      <td>{'algorithm': 'ball_tree', 'n_neighbors': 3}</td>
       <td>0.842500</td>
       <td>0.845430</td>
       <td>0.853307</td>
@@ -1061,7 +834,187 @@ weighted avg       0.98      0.98      0.98     21892
       <td>0.849012</td>
       <td>0.847648</td>
       <td>0.003617</td>
-      <td>2</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>5.932471</td>
+      <td>0.280649</td>
+      <td>877.648901</td>
+      <td>38.148830</td>
+      <td>ball_tree</td>
+      <td>5</td>
+      <td>{'algorithm': 'ball_tree', 'n_neighbors': 5}</td>
+      <td>0.828991</td>
+      <td>0.833246</td>
+      <td>0.842461</td>
+      <td>0.837188</td>
+      <td>0.829176</td>
+      <td>0.834212</td>
+      <td>0.005108</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>6.167510</td>
+      <td>0.203123</td>
+      <td>868.646685</td>
+      <td>12.200763</td>
+      <td>ball_tree</td>
+      <td>7</td>
+      <td>{'algorithm': 'ball_tree', 'n_neighbors': 7}</td>
+      <td>0.819866</td>
+      <td>0.825346</td>
+      <td>0.832518</td>
+      <td>0.830804</td>
+      <td>0.826584</td>
+      <td>0.827024</td>
+      <td>0.004444</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>6.567450</td>
+      <td>0.124597</td>
+      <td>140.527117</td>
+      <td>4.662762</td>
+      <td>kd_tree</td>
+      <td>1</td>
+      <td>{'algorithm': 'kd_tree', 'n_neighbors': 1}</td>
+      <td>0.864455</td>
+      <td>0.874834</td>
+      <td>0.871268</td>
+      <td>0.864194</td>
+      <td>0.861808</td>
+      <td>0.867312</td>
+      <td>0.004907</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>6.503462</td>
+      <td>0.196072</td>
+      <td>184.166617</td>
+      <td>10.873656</td>
+      <td>kd_tree</td>
+      <td>3</td>
+      <td>{'algorithm': 'kd_tree', 'n_neighbors': 3}</td>
+      <td>0.842500</td>
+      <td>0.845430</td>
+      <td>0.853307</td>
+      <td>0.847991</td>
+      <td>0.849012</td>
+      <td>0.847648</td>
+      <td>0.003617</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>6.330136</td>
+      <td>0.170726</td>
+      <td>173.438915</td>
+      <td>5.996783</td>
+      <td>kd_tree</td>
+      <td>5</td>
+      <td>{'algorithm': 'kd_tree', 'n_neighbors': 5}</td>
+      <td>0.828991</td>
+      <td>0.833246</td>
+      <td>0.842461</td>
+      <td>0.837188</td>
+      <td>0.829176</td>
+      <td>0.834212</td>
+      <td>0.005108</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>5.628980</td>
+      <td>0.177416</td>
+      <td>162.514831</td>
+      <td>6.304179</td>
+      <td>kd_tree</td>
+      <td>7</td>
+      <td>{'algorithm': 'kd_tree', 'n_neighbors': 7}</td>
+      <td>0.819866</td>
+      <td>0.825346</td>
+      <td>0.832518</td>
+      <td>0.830804</td>
+      <td>0.826584</td>
+      <td>0.827024</td>
+      <td>0.004444</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>0.119329</td>
+      <td>0.006090</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>faiss</td>
+      <td>1</td>
+      <td>{'algorithm': 'faiss', 'n_neighbors': 1}</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>0.121814</td>
+      <td>0.015251</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>faiss</td>
+      <td>3</td>
+      <td>{'algorithm': 'faiss', 'n_neighbors': 3}</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>0.124726</td>
+      <td>0.010424</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>faiss</td>
+      <td>5</td>
+      <td>{'algorithm': 'faiss', 'n_neighbors': 5}</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>0.126965</td>
+      <td>0.009844</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>faiss</td>
+      <td>7</td>
+      <td>{'algorithm': 'faiss', 'n_neighbors': 7}</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>9</td>
     </tr>
   </tbody>
 </table>
@@ -1088,9 +1041,9 @@ weighted avg       0.98      0.98      0.98     21892
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set the hyperparameters</span>
 
 <span class="n">tree_param_grid</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
-    <span class="c1">#&#39;max_leaf_nodes&#39;: [2, 4, 6],</span>
-    <span class="c1">#&#39;min_samples_leaf&#39;: [1, 2, 4],</span>
+    <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span>
+    <span class="s1">&#39;min_samples_split&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+    <span class="s1">&#39;criterion&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;gini&#39;</span><span class="p">,</span> <span class="s1">&#39;entropy&#39;</span><span class="p">],</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -1110,7 +1063,7 @@ weighted avg       0.98      0.98      0.98     21892
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 3 candidates, totalling 15 fits
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 12 candidates, totalling 60 fits
 </pre></div>
 </div>
 </div>
@@ -1259,7 +1212,7 @@ weighted avg       0.98      0.98      0.98     21892
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reporte de Clasificación:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">report</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reporte de Clasificación:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">tree_results</span><span class="p">[</span><span class="s2">&quot;classification_report&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -1393,10 +1346,9 @@ weighted avg       0.98      0.98      0.98     21892
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">logreg_param_grid</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">],</span>  <span class="c1"># Tipos de regularización</span>
-    <span class="c1">#&#39;C&#39;: [0.001, 0.01, 0.1, 1, 10],   # Fuerza de regularización</span>
-    <span class="c1">#&#39;solver&#39;: [&#39;saga&#39;, &#39;liblinear&#39;],  # Solvers compatibles</span>
-    <span class="s1">&#39;max_iter&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">500</span><span class="p">],</span>     <span class="c1"># Iteraciones máximas</span>
+    <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+    <span class="s1">&#39;solver&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span> <span class="s1">&#39;saga&#39;</span><span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -1418,27 +1370,27 @@ weighted avg       0.98      0.98      0.98     21892
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 9 candidates, totalling 45 fits
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 18 candidates, totalling 90 fits
 </pre></div>
 </div>
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_validation.py:540: FitFailedWarning: 
-30 fits failed out of a total of 45.
+30 fits failed out of a total of 90.
 The score on these train-test partitions for these parameters will be set to nan.
 If these failures are not expected, you can try to debug them by setting error_score=&#39;raise&#39;.
 
 Below are more details about the failures:
 --------------------------------------------------------------------------------
-15 fits failed with the following error:
+4 fits failed with the following error:
 Traceback (most recent call last):
   File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_validation.py&quot;, line 888, in _fit_and_score
     estimator.fit(X_train, y_train, **fit_params)
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 1473, in wrapper
-    return fit_method(estimator, *args, **kwargs)
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\linear_model\_logistic.py&quot;, line 1194, in fit
-    solver = _check_solver(self.solver, self.penalty, self.dual)
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\linear_model\_logistic.py&quot;, line 67, in _check_solver
-    raise ValueError(
-ValueError: Solver lbfgs supports only &#39;l2&#39; or None penalties, got l1 penalty.
+  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 1466, in wrapper
+    estimator._validate_params()
+  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 666, in _validate_params
+    validate_parameter_constraints(
+  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\utils\_param_validation.py&quot;, line 95, in validate_parameter_constraints
+    raise InvalidParameterError(
+sklearn.utils._param_validation.InvalidParameterError: The &#39;penalty&#39; parameter of LogisticRegression must be a str among {&#39;l2&#39;, &#39;l1&#39;, &#39;elasticnet&#39;} or None. Got &#39;none&#39; instead.
 
 --------------------------------------------------------------------------------
 4 fits failed with the following error:
@@ -1451,37 +1403,40 @@ Traceback (most recent call last):
     validate_parameter_constraints(
   File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\utils\_param_validation.py&quot;, line 95, in validate_parameter_constraints
     raise InvalidParameterError(
+sklearn.utils._param_validation.InvalidParameterError: The &#39;penalty&#39; parameter of LogisticRegression must be a str among {&#39;l1&#39;, &#39;l2&#39;, &#39;elasticnet&#39;} or None. Got &#39;none&#39; instead.
+
+--------------------------------------------------------------------------------
+2 fits failed with the following error:
+Traceback (most recent call last):
+  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_validation.py&quot;, line 888, in _fit_and_score
+    estimator.fit(X_train, y_train, **fit_params)
+  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 1466, in wrapper
+    estimator._validate_params()
+  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 666, in _validate_params
+    validate_parameter_constraints(
+  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\utils\_param_validation.py&quot;, line 95, in validate_parameter_constraints
+    raise InvalidParameterError(
+sklearn.utils._param_validation.InvalidParameterError: The &#39;penalty&#39; parameter of LogisticRegression must be a str among {&#39;l1&#39;, &#39;elasticnet&#39;, &#39;l2&#39;} or None. Got &#39;none&#39; instead.
+
+--------------------------------------------------------------------------------
+20 fits failed with the following error:
+Traceback (most recent call last):
+  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_validation.py&quot;, line 888, in _fit_and_score
+    estimator.fit(X_train, y_train, **fit_params)
+  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 1466, in wrapper
+    estimator._validate_params()
+  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 666, in _validate_params
+    validate_parameter_constraints(
+  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\utils\_param_validation.py&quot;, line 95, in validate_parameter_constraints
+    raise InvalidParameterError(
 sklearn.utils._param_validation.InvalidParameterError: The &#39;penalty&#39; parameter of LogisticRegression must be a str among {&#39;elasticnet&#39;, &#39;l2&#39;, &#39;l1&#39;} or None. Got &#39;none&#39; instead.
 
---------------------------------------------------------------------------------
-6 fits failed with the following error:
-Traceback (most recent call last):
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_validation.py&quot;, line 888, in _fit_and_score
-    estimator.fit(X_train, y_train, **fit_params)
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 1466, in wrapper
-    estimator._validate_params()
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 666, in _validate_params
-    validate_parameter_constraints(
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\utils\_param_validation.py&quot;, line 95, in validate_parameter_constraints
-    raise InvalidParameterError(
-sklearn.utils._param_validation.InvalidParameterError: The &#39;penalty&#39; parameter of LogisticRegression must be a str among {&#39;elasticnet&#39;, &#39;l1&#39;, &#39;l2&#39;} or None. Got &#39;none&#39; instead.
-
---------------------------------------------------------------------------------
-5 fits failed with the following error:
-Traceback (most recent call last):
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_validation.py&quot;, line 888, in _fit_and_score
-    estimator.fit(X_train, y_train, **fit_params)
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 1466, in wrapper
-    estimator._validate_params()
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 666, in _validate_params
-    validate_parameter_constraints(
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\utils\_param_validation.py&quot;, line 95, in validate_parameter_constraints
-    raise InvalidParameterError(
-sklearn.utils._param_validation.InvalidParameterError: The &#39;penalty&#39; parameter of LogisticRegression must be a str among {&#39;l2&#39;, &#39;l1&#39;, &#39;elasticnet&#39;} or None. Got &#39;none&#39; instead.
-
   warnings.warn(some_fits_failed_message, FitFailedWarning)
-c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_search.py:1103: UserWarning: One or more of the test scores are non-finite: [       nan 0.55716437        nan        nan 0.56376423        nan
-        nan 0.56408137        nan]
+c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_search.py:1103: UserWarning: One or more of the test scores are non-finite: [0.45127593 0.50644129 0.4369693  0.48826891        nan        nan
+ 0.49430412 0.57773828 0.47762794 0.56643862        nan        nan
+ 0.50286665 0.58639758 0.49875411 0.58451995        nan        nan]
+  warnings.warn(
+c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\linear_model\_sag.py:349: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
 </pre></div>
 </div>
@@ -1552,9 +1507,9 @@ c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_sel
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rf_param_grid</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
-    <span class="c1">#&#39;max_depth&#39;: [4, 6, 8],</span>
-    <span class="c1">#&#39;max_leaf_nodes&#39;: [2, 4, 6],</span>
+    <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">400</span><span class="p">],</span>
+    <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span>
+    <span class="s1">&#39;min_samples_leaf&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -1571,7 +1526,7 @@ c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_sel
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 3 candidates, totalling 15 fits
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 27 candidates, totalling 135 fits
 </pre></div>
 </div>
 </div>
@@ -1618,9 +1573,11 @@ c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_sel
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xgb_param_grid</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">],</span>
-    <span class="c1">#&#39;max_depth&#39;: [1, 3],</span>
-    <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">]</span>
+    <span class="s1">&#39;tree_method&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span> <span class="s1">&#39;approx&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+    <span class="c1">#&#39;early_stopping_rounds&#39;: [10, 20],</span>
+    <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> 
+    <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="mi">200</span><span class="p">,</span><span class="mi">400</span><span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -1647,9 +1604,7 @@ c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_sel
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 4 candidates, totalling 20 fits
-[23:22:30] INFO: C:\actions-runner\_work\xgboost\xgboost\src\data\iterative_dmatrix.cc:53: Finished constructing the `IterativeDMatrix`: (87554, 187, 16372598).
-[23:22:30] INFO: C:\actions-runner\_work\xgboost\xgboost\src\data\ellpack_page.cu:167: Ellpack is dense.
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 36 candidates, totalling 180 fits
 </pre></div>
 </div>
 </div>
@@ -1886,6 +1841,15 @@ weighted avg       0.96      0.96      0.96     21892
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
+    <a class="left-prev"
+       href="EDA.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Exploratory Data Analysis</p>
+      </div>
+    </a>
 </div>
                 </footer>
               
