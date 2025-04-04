@@ -394,8 +394,23 @@
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id14">Análisis de resultados generales y test</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#svm">SVM</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mlp">MLP</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#linearsvm">LinearSVM</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id15">Análisis de resultados generales y test</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#svm-svc">SVM (SVC)</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#definir-los-hiperparametros">Definir los hiperparámetros</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id16">Análisis de resultados generales y test</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mlp-sklearn">MLP (sklearn)</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id17">Análisis de resultados generales y test</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configuracion-para-los-modelos-con-gpu">Configuración para los modelos con GPU</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crearcion-de-tensores">Crearción de tensores</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparacion-de-resultados-de-todos-los-modelos">Comparación de resultados de todos los modelos</a></li>
@@ -424,9 +439,12 @@
 <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 
 <span class="c1"># sklearn and other ml functions</span>
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span><span class="p">,</span> <span class="n">cross_val_score</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span><span class="p">,</span> <span class="n">train_test_split</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">label_binarize</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">confusion_matrix</span><span class="p">,</span> <span class="n">classification_report</span><span class="p">,</span> <span class="n">recall_score</span><span class="p">,</span> <span class="n">precision_score</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">f1_score</span><span class="p">,</span> <span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">make_scorer</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="p">(</span> 
+    <span class="n">confusion_matrix</span><span class="p">,</span> <span class="n">classification_report</span><span class="p">,</span> <span class="n">recall_score</span><span class="p">,</span> <span class="n">precision_score</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">f1_score</span><span class="p">,</span> <span class="n">roc_auc_score</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -553,7 +571,18 @@
 
     <span class="c1"># Predict with test data</span>
     <span class="n">y_pred</span> <span class="o">=</span> <span class="n">best_estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-    <span class="n">y_pred_proba</span> <span class="o">=</span> <span class="n">best_estimator</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+
+    <span class="c1"># Intentar obtener probabilidades si el modelo lo permite</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">best_estimator</span><span class="p">,</span> <span class="s2">&quot;predict_proba&quot;</span><span class="p">):</span>
+        <span class="n">y_pred_proba</span> <span class="o">=</span> <span class="n">best_estimator</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+        <span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_proba</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;ovr&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">best_estimator</span><span class="p">,</span> <span class="s2">&quot;decision_function&quot;</span><span class="p">):</span>  <span class="c1"># Para modelos como LinearSVC</span>
+        <span class="n">y_pred_proba</span> <span class="o">=</span> <span class="n">best_estimator</span><span class="o">.</span><span class="n">decision_function</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+        <span class="n">auc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># No se puede calcular el AUC directamente en clasificación multiclase sin probabilidades</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">y_pred_proba</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">auc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
     <span class="c1"># Calculate evaluation metrics</span>
     <span class="n">precision</span> <span class="o">=</span> <span class="n">precision_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s1">&#39;macro&#39;</span><span class="p">)</span>
@@ -561,7 +590,7 @@
     <span class="n">accuracy</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
     <span class="n">f1</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s1">&#39;macro&#39;</span><span class="p">)</span>
     <span class="n">cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
-    <span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_proba</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;ovr&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">best_estimator</span><span class="p">,</span> <span class="s1">&#39;predict_proba&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="c1"># auc = roc_auc_score(y_test, y_pred_proba, multi_class=&#39;ovr&#39;) if hasattr(best_estimator, &#39;predict_proba&#39;) else np.nan</span>
     <span class="n">report</span> <span class="o">=</span> <span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
 
     <span class="c1"># Save evaluation results</span>
@@ -605,7 +634,7 @@
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">knn_param_grid</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;n_neighbors&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
-    <span class="s1">&#39;algorithm&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;ball_tree&#39;</span><span class="p">,</span> <span class="s1">&#39;kd_tree&#39;</span><span class="p">,</span> <span class="s1">&#39;faiss&#39;</span><span class="p">]</span>
+    <span class="s1">&#39;algorithm&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;ball_tree&#39;</span><span class="p">,</span> <span class="s1">&#39;kd_tree&#39;</span><span class="p">,</span> <span class="s1">&#39;auto&#39;</span><span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -890,7 +919,7 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">knn_results</span><span class="p">[</span><span class="s1">&#39;cv_results&#39;</span><span class="p">])</span>
 
 <span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_n_neighbors&#39;</span><span class="p">,</span>
-                                  <span class="c1">#columns=&#39;param_weights&#39;,</span>
+                                  <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;param_algorithm&#39;</span><span class="p">,</span>
                                   <span class="n">values</span><span class="o">=</span><span class="s1">&#39;mean_test_score&#39;</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
@@ -903,7 +932,26 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/4518962e08fa8b0cc73e123f80721cb1f3c0cf0478a860647a72f9ee0920c8f9.png" src="../_images/4518962e08fa8b0cc73e123f80721cb1f3c0cf0478a860647a72f9ee0920c8f9.png" />
+<img alt="../_images/b3b50e17056f2ec619f1dbc699db9c7e4b8d8289ce16b59a3abfccea2e1fcc6c.png" src="../_images/b3b50e17056f2ec619f1dbc699db9c7e4b8d8289ce16b59a3abfccea2e1fcc6c.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_n_neighbors&#39;</span><span class="p">,</span>
+                                  <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;param_algorithm&#39;</span><span class="p">,</span>
+                                  <span class="n">values</span><span class="o">=</span><span class="s1">&#39;mean_fit_time&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;fit time (segs) Por algoritmo&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;weights&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;n_neighbors&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/3baaf15ca040e5542d4514612e5b3749f5169c86c95d91950e3e8cff9db0d3fa.png" src="../_images/3baaf15ca040e5542d4514612e5b3749f5169c86c95d91950e3e8cff9db0d3fa.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -984,269 +1032,6 @@ weighted avg       0.98      0.98      0.98     21892
 </div>
 </div>
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">knn_results</span><span class="p">[</span><span class="s2">&quot;cv_results&quot;</span><span class="p">])</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>mean_fit_time</th>
-      <th>std_fit_time</th>
-      <th>mean_score_time</th>
-      <th>std_score_time</th>
-      <th>param_algorithm</th>
-      <th>param_n_neighbors</th>
-      <th>params</th>
-      <th>split0_test_score</th>
-      <th>split1_test_score</th>
-      <th>split2_test_score</th>
-      <th>split3_test_score</th>
-      <th>split4_test_score</th>
-      <th>mean_test_score</th>
-      <th>std_test_score</th>
-      <th>rank_test_score</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>4.854034</td>
-      <td>0.602060</td>
-      <td>867.799731</td>
-      <td>6.329146</td>
-      <td>ball_tree</td>
-      <td>1</td>
-      <td>{'algorithm': 'ball_tree', 'n_neighbors': 1}</td>
-      <td>0.864455</td>
-      <td>0.874834</td>
-      <td>0.871268</td>
-      <td>0.864194</td>
-      <td>0.861808</td>
-      <td>0.867312</td>
-      <td>0.004907</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>5.787230</td>
-      <td>0.318221</td>
-      <td>916.147086</td>
-      <td>12.684448</td>
-      <td>ball_tree</td>
-      <td>3</td>
-      <td>{'algorithm': 'ball_tree', 'n_neighbors': 3}</td>
-      <td>0.842500</td>
-      <td>0.845430</td>
-      <td>0.853307</td>
-      <td>0.847991</td>
-      <td>0.849012</td>
-      <td>0.847648</td>
-      <td>0.003617</td>
-      <td>3</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>5.932471</td>
-      <td>0.280649</td>
-      <td>877.648901</td>
-      <td>38.148830</td>
-      <td>ball_tree</td>
-      <td>5</td>
-      <td>{'algorithm': 'ball_tree', 'n_neighbors': 5}</td>
-      <td>0.828991</td>
-      <td>0.833246</td>
-      <td>0.842461</td>
-      <td>0.837188</td>
-      <td>0.829176</td>
-      <td>0.834212</td>
-      <td>0.005108</td>
-      <td>5</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>6.167510</td>
-      <td>0.203123</td>
-      <td>868.646685</td>
-      <td>12.200763</td>
-      <td>ball_tree</td>
-      <td>7</td>
-      <td>{'algorithm': 'ball_tree', 'n_neighbors': 7}</td>
-      <td>0.819866</td>
-      <td>0.825346</td>
-      <td>0.832518</td>
-      <td>0.830804</td>
-      <td>0.826584</td>
-      <td>0.827024</td>
-      <td>0.004444</td>
-      <td>7</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>6.567450</td>
-      <td>0.124597</td>
-      <td>140.527117</td>
-      <td>4.662762</td>
-      <td>kd_tree</td>
-      <td>1</td>
-      <td>{'algorithm': 'kd_tree', 'n_neighbors': 1}</td>
-      <td>0.864455</td>
-      <td>0.874834</td>
-      <td>0.871268</td>
-      <td>0.864194</td>
-      <td>0.861808</td>
-      <td>0.867312</td>
-      <td>0.004907</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>6.503462</td>
-      <td>0.196072</td>
-      <td>184.166617</td>
-      <td>10.873656</td>
-      <td>kd_tree</td>
-      <td>3</td>
-      <td>{'algorithm': 'kd_tree', 'n_neighbors': 3}</td>
-      <td>0.842500</td>
-      <td>0.845430</td>
-      <td>0.853307</td>
-      <td>0.847991</td>
-      <td>0.849012</td>
-      <td>0.847648</td>
-      <td>0.003617</td>
-      <td>3</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>6.330136</td>
-      <td>0.170726</td>
-      <td>173.438915</td>
-      <td>5.996783</td>
-      <td>kd_tree</td>
-      <td>5</td>
-      <td>{'algorithm': 'kd_tree', 'n_neighbors': 5}</td>
-      <td>0.828991</td>
-      <td>0.833246</td>
-      <td>0.842461</td>
-      <td>0.837188</td>
-      <td>0.829176</td>
-      <td>0.834212</td>
-      <td>0.005108</td>
-      <td>5</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>5.628980</td>
-      <td>0.177416</td>
-      <td>162.514831</td>
-      <td>6.304179</td>
-      <td>kd_tree</td>
-      <td>7</td>
-      <td>{'algorithm': 'kd_tree', 'n_neighbors': 7}</td>
-      <td>0.819866</td>
-      <td>0.825346</td>
-      <td>0.832518</td>
-      <td>0.830804</td>
-      <td>0.826584</td>
-      <td>0.827024</td>
-      <td>0.004444</td>
-      <td>7</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>0.119329</td>
-      <td>0.006090</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>faiss</td>
-      <td>1</td>
-      <td>{'algorithm': 'faiss', 'n_neighbors': 1}</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>9</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>0.121814</td>
-      <td>0.015251</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>faiss</td>
-      <td>3</td>
-      <td>{'algorithm': 'faiss', 'n_neighbors': 3}</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>9</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>0.124726</td>
-      <td>0.010424</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>faiss</td>
-      <td>5</td>
-      <td>{'algorithm': 'faiss', 'n_neighbors': 5}</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>9</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>0.126965</td>
-      <td>0.009844</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>faiss</td>
-      <td>7</td>
-      <td>{'algorithm': 'faiss', 'n_neighbors': 7}</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>9</td>
-    </tr>
-  </tbody>
-</table>
-</div></div></div>
-</div>
 </section>
 </section>
 <section id="decision-tree">
@@ -1255,8 +1040,6 @@ weighted avg       0.98      0.98      0.98     21892
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># libraries for decision trees</span>
 <span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeClassifier</span>
-<span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">export_graphviz</span>
-<span class="kn">import</span> <span class="nn">graphviz</span>
 </pre></div>
 </div>
 </div>
@@ -1327,26 +1110,48 @@ weighted avg       0.98      0.98      0.98     21892
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">tree_results</span><span class="p">[</span><span class="s1">&#39;cv_results&#39;</span><span class="p">])</span>
 
-<span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_max_depth&#39;</span><span class="p">,</span> 
-                                  <span class="c1">#columns=&#39;param_weights&#39;, </span>
+<span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_criterion&#39;</span><span class="p">,</span> 
+                                  <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;param_max_depth&#39;</span><span class="p">,</span> 
                                   <span class="n">values</span><span class="o">=</span><span class="s1">&#39;mean_test_score&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Recall (macro) según n_neighbors y weights&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;weights&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;n_neighbors&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;max_depth&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;criterion&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/8817879619ee3da8fe1ca06d67de780c6074a879689bb8aa4c9b5969ddc9a550.png" src="../_images/8817879619ee3da8fe1ca06d67de780c6074a879689bb8aa4c9b5969ddc9a550.png" />
+<img alt="../_images/a7c7138ec6d47cdeb95d20aff161abe6290d09eb542a2c0f3189bb73ade903a5.png" src="../_images/a7c7138ec6d47cdeb95d20aff161abe6290d09eb542a2c0f3189bb73ade903a5.png" />
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot the tree</span>
-<span class="n">export_graphviz</span><span class="p">(</span><span class="n">tree_grid_search</span><span class="o">.</span><span class="n">best_estimator_</span><span class="p">,</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_criterion&#39;</span><span class="p">,</span> 
+                                  <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;param_min_samples_split&#39;</span><span class="p">,</span> 
+                                  <span class="n">values</span><span class="o">=</span><span class="s1">&#39;mean_test_score&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Recall (macro) según n_neighbors y weights&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;weights&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;min_samples_split&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/297af35034919553a43282b0784d864ae9d6f350b86f60a995ed1d78c33e89c7.png" src="../_images/297af35034919553a43282b0784d864ae9d6f350b86f60a995ed1d78c33e89c7.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">export_graphviz</span>
+<span class="kn">import</span> <span class="nn">graphviz</span>
+
+<span class="n">tree_estimador</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;models/best_tree_model.pkl&#39;</span><span class="p">)</span>
+
+<span class="n">export_graphviz</span><span class="p">(</span><span class="n">tree_estimador</span><span class="p">,</span>
                 <span class="n">out_file</span><span class="o">=</span><span class="s2">&quot;results/tree.dot&quot;</span><span class="p">,</span>
                 <span class="n">impurity</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">filled</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1360,12 +1165,12 @@ weighted avg       0.98      0.98      0.98     21892
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/c269a0b144ef7cdc6e1be52e79e35974941476689ca5527aa891136c40463d72.svg" src="../_images/c269a0b144ef7cdc6e1be52e79e35974941476689ca5527aa891136c40463d72.svg" />
+<img alt="../_images/04daa64a88ea67945ca6fc95bf1c0d0c469aba5889a5456d4067e87384d09bac.svg" src="../_images/04daa64a88ea67945ca6fc95bf1c0d0c469aba5889a5456d4067e87384d09bac.svg" />
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">importances</span> <span class="o">=</span> <span class="n">tree_grid_search</span><span class="o">.</span><span class="n">best_estimator_</span><span class="o">.</span><span class="n">feature_importances_</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">importances</span> <span class="o">=</span> <span class="n">tree_estimador</span><span class="o">.</span><span class="n">feature_importances_</span>
 <span class="n">mask</span> <span class="o">=</span> <span class="n">importances</span> <span class="o">&gt;</span> <span class="mf">0.01</span>
 <span class="n">filtered_importances</span> <span class="o">=</span> <span class="n">importances</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
 <span class="n">filtered_features</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
@@ -1379,7 +1184,7 @@ weighted avg       0.98      0.98      0.98     21892
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/14ef005e0d60471255fb0d811457eabbfdee3c1dacc3ed33aef38521b9bff2d5.png" src="../_images/14ef005e0d60471255fb0d811457eabbfdee3c1dacc3ed33aef38521b9bff2d5.png" />
+<img alt="../_images/b169c3da29eae9f75d4a2fbb0305a9583b8e7760e9eb653dee34a8517e2f278f.png" src="../_images/b169c3da29eae9f75d4a2fbb0305a9583b8e7760e9eb653dee34a8517e2f278f.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -1418,7 +1223,7 @@ weighted avg       0.98      0.98      0.98     21892
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/e12bc5702a4f00deb4cfe36994015a6c3e729e6f084fc26fd19c9d60fb8d726e.png" src="../_images/e12bc5702a4f00deb4cfe36994015a6c3e729e6f084fc26fd19c9d60fb8d726e.png" />
+<img alt="../_images/09db347f42e0723eb531d43bf420d50ae728ea12e94b539b602495a487eba341.png" src="../_images/09db347f42e0723eb531d43bf420d50ae728ea12e94b539b602495a487eba341.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -1434,7 +1239,7 @@ weighted avg       0.98      0.98      0.98     21892
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/4abf878659352852b13516b507ef2b7f407c97b2914532411c41923fa4c97b9f.png" src="../_images/4abf878659352852b13516b507ef2b7f407c97b2914532411c41923fa4c97b9f.png" />
+<img alt="../_images/8fa2d3379e85aead487ad04fa4c744ccac5a263c40eb725bfa5422643d1abcad.png" src="../_images/8fa2d3379e85aead487ad04fa4c744ccac5a263c40eb725bfa5422643d1abcad.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -1447,22 +1252,22 @@ weighted avg       0.98      0.98      0.98     21892
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Reporte de Clasificación:
                precision    recall  f1-score   support
 
-         0.0       0.98      0.99      0.99     18118
-         1.0       0.82      0.73      0.77       556
-         2.0       0.94      0.92      0.93      1448
-         3.0       0.77      0.73      0.75       162
-         4.0       0.98      0.97      0.98      1608
+         0.0       0.98      0.98      0.98     18118
+         1.0       0.72      0.69      0.70       556
+         2.0       0.88      0.89      0.88      1448
+         3.0       0.62      0.62      0.62       162
+         4.0       0.96      0.94      0.95      1608
 
-    accuracy                           0.98     21892
-   macro avg       0.90      0.87      0.88     21892
-weighted avg       0.98      0.98      0.98     21892
+    accuracy                           0.96     21892
+   macro avg       0.83      0.82      0.83     21892
+weighted avg       0.96      0.96      0.96     21892
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">tree_results</span><span class="p">[</span><span class="s2">&quot;cv_results&quot;</span><span class="p">])</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">tree_results</span><span class="p">[</span><span class="s2">&quot;cv_results&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;rank_test_score&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1489,7 +1294,9 @@ weighted avg       0.98      0.98      0.98     21892
       <th>std_fit_time</th>
       <th>mean_score_time</th>
       <th>std_score_time</th>
+      <th>param_criterion</th>
       <th>param_max_depth</th>
+      <th>param_min_samples_split</th>
       <th>params</th>
       <th>split0_test_score</th>
       <th>split1_test_score</th>
@@ -1503,55 +1310,232 @@ weighted avg       0.98      0.98      0.98     21892
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>5.864887</td>
-      <td>0.188926</td>
-      <td>0.027067</td>
-      <td>0.002394</td>
-      <td>4</td>
-      <td>{'max_depth': 4}</td>
-      <td>0.491118</td>
-      <td>0.490629</td>
-      <td>0.488003</td>
-      <td>0.484815</td>
-      <td>0.488078</td>
-      <td>0.488529</td>
-      <td>0.002253</td>
-      <td>3</td>
+      <th>7</th>
+      <td>28.281401</td>
+      <td>0.350393</td>
+      <td>0.025302</td>
+      <td>0.001600</td>
+      <td>entropy</td>
+      <td>None</td>
+      <td>5</td>
+      <td>{'criterion': 'entropy', 'max_depth': None, 'm...</td>
+      <td>0.834703</td>
+      <td>0.829143</td>
+      <td>0.806245</td>
+      <td>0.809005</td>
+      <td>0.816709</td>
+      <td>0.819161</td>
+      <td>0.011110</td>
+      <td>1</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>8.777209</td>
-      <td>0.105486</td>
-      <td>0.026877</td>
-      <td>0.001897</td>
-      <td>6</td>
-      <td>{'max_depth': 6}</td>
-      <td>0.595223</td>
-      <td>0.591816</td>
-      <td>0.596712</td>
-      <td>0.619213</td>
-      <td>0.594812</td>
-      <td>0.599555</td>
-      <td>0.009956</td>
+      <th>11</th>
+      <td>24.388292</td>
+      <td>0.742805</td>
+      <td>0.018999</td>
+      <td>0.001673</td>
+      <td>entropy</td>
+      <td>20</td>
+      <td>5</td>
+      <td>{'criterion': 'entropy', 'max_depth': 20, 'min...</td>
+      <td>0.833463</td>
+      <td>0.822398</td>
+      <td>0.809584</td>
+      <td>0.812500</td>
+      <td>0.815908</td>
+      <td>0.818770</td>
+      <td>0.008496</td>
       <td>2</td>
     </tr>
     <tr>
-      <th>2</th>
-      <td>9.940058</td>
-      <td>0.646965</td>
-      <td>0.028353</td>
-      <td>0.015473</td>
+      <th>6</th>
+      <td>29.123919</td>
+      <td>0.325252</td>
+      <td>0.024600</td>
+      <td>0.001623</td>
+      <td>entropy</td>
+      <td>None</td>
+      <td>2</td>
+      <td>{'criterion': 'entropy', 'max_depth': None, 'm...</td>
+      <td>0.828253</td>
+      <td>0.826122</td>
+      <td>0.804967</td>
+      <td>0.814492</td>
+      <td>0.813230</td>
+      <td>0.817413</td>
+      <td>0.008652</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>26.653801</td>
+      <td>0.752611</td>
+      <td>0.022399</td>
+      <td>0.002577</td>
+      <td>entropy</td>
+      <td>20</td>
+      <td>2</td>
+      <td>{'criterion': 'entropy', 'max_depth': 20, 'min...</td>
+      <td>0.826918</td>
+      <td>0.822659</td>
+      <td>0.805389</td>
+      <td>0.810408</td>
+      <td>0.815119</td>
+      <td>0.816098</td>
+      <td>0.007850</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>44.518721</td>
+      <td>1.361803</td>
+      <td>0.037007</td>
+      <td>0.003486</td>
+      <td>gini</td>
+      <td>None</td>
+      <td>2</td>
+      <td>{'criterion': 'gini', 'max_depth': None, 'min_...</td>
+      <td>0.809401</td>
+      <td>0.800555</td>
+      <td>0.788808</td>
+      <td>0.806297</td>
+      <td>0.810785</td>
+      <td>0.803169</td>
+      <td>0.007996</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>44.392492</td>
+      <td>1.377895</td>
+      <td>0.034506</td>
+      <td>0.003776</td>
+      <td>gini</td>
+      <td>None</td>
+      <td>5</td>
+      <td>{'criterion': 'gini', 'max_depth': None, 'min_...</td>
+      <td>0.813110</td>
+      <td>0.795805</td>
+      <td>0.790335</td>
+      <td>0.806895</td>
+      <td>0.790083</td>
+      <td>0.799246</td>
+      <td>0.009229</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>23.486303</td>
+      <td>0.137720</td>
+      <td>0.030402</td>
+      <td>0.001626</td>
+      <td>gini</td>
+      <td>20</td>
+      <td>2</td>
+      <td>{'criterion': 'gini', 'max_depth': 20, 'min_sa...</td>
+      <td>0.783653</td>
+      <td>0.788089</td>
+      <td>0.769154</td>
+      <td>0.789471</td>
+      <td>0.777107</td>
+      <td>0.781495</td>
+      <td>0.007527</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>23.353283</td>
+      <td>0.050061</td>
+      <td>0.026800</td>
+      <td>0.001327</td>
+      <td>gini</td>
+      <td>20</td>
+      <td>5</td>
+      <td>{'criterion': 'gini', 'max_depth': 20, 'min_sa...</td>
+      <td>0.780668</td>
+      <td>0.782953</td>
+      <td>0.768290</td>
+      <td>0.786696</td>
+      <td>0.770166</td>
+      <td>0.777754</td>
+      <td>0.007247</td>
       <td>8</td>
-      <td>{'max_depth': 8}</td>
-      <td>0.654160</td>
-      <td>0.669396</td>
-      <td>0.645731</td>
-      <td>0.668477</td>
-      <td>0.666730</td>
-      <td>0.660899</td>
-      <td>0.009371</td>
-      <td>1</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>21.657659</td>
+      <td>0.171903</td>
+      <td>0.024302</td>
+      <td>0.001884</td>
+      <td>entropy</td>
+      <td>10</td>
+      <td>2</td>
+      <td>{'criterion': 'entropy', 'max_depth': 10, 'min...</td>
+      <td>0.738223</td>
+      <td>0.781583</td>
+      <td>0.747689</td>
+      <td>0.797494</td>
+      <td>0.767910</td>
+      <td>0.766580</td>
+      <td>0.021650</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>21.610049</td>
+      <td>0.156902</td>
+      <td>0.023200</td>
+      <td>0.000748</td>
+      <td>entropy</td>
+      <td>10</td>
+      <td>5</td>
+      <td>{'criterion': 'entropy', 'max_depth': 10, 'min...</td>
+      <td>0.738347</td>
+      <td>0.783031</td>
+      <td>0.746274</td>
+      <td>0.793917</td>
+      <td>0.765756</td>
+      <td>0.765465</td>
+      <td>0.021080</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>12.755892</td>
+      <td>0.113780</td>
+      <td>0.025201</td>
+      <td>0.001166</td>
+      <td>gini</td>
+      <td>10</td>
+      <td>5</td>
+      <td>{'criterion': 'gini', 'max_depth': 10, 'min_sa...</td>
+      <td>0.698692</td>
+      <td>0.696824</td>
+      <td>0.711598</td>
+      <td>0.721214</td>
+      <td>0.708410</td>
+      <td>0.707348</td>
+      <td>0.008912</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>12.804345</td>
+      <td>0.041674</td>
+      <td>0.026400</td>
+      <td>0.002059</td>
+      <td>gini</td>
+      <td>10</td>
+      <td>2</td>
+      <td>{'criterion': 'gini', 'max_depth': 10, 'min_sa...</td>
+      <td>0.700676</td>
+      <td>0.694387</td>
+      <td>0.709284</td>
+      <td>0.721743</td>
+      <td>0.706436</td>
+      <td>0.706505</td>
+      <td>0.009173</td>
+      <td>12</td>
     </tr>
   </tbody>
 </table>
@@ -1573,7 +1557,7 @@ weighted avg       0.98      0.98      0.98     21892
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">logreg_param_grid</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
     <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
     <span class="s1">&#39;solver&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span> <span class="s1">&#39;saga&#39;</span><span class="p">]</span>
 <span class="p">}</span>
@@ -1586,85 +1570,13 @@ weighted avg       0.98      0.98      0.98     21892
 <h4>Grid search para entrenar el mejor estimador<a class="headerlink" href="#id6" title="Link to this heading">#</a></h4>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">logreg_clf</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">logreg_clf</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
 <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="n">logreg_grid_search</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
     <span class="n">logreg_clf</span><span class="p">,</span>
     <span class="n">param_grid</span><span class="o">=</span><span class="n">logreg_param_grid</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">scorer</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="n">refit</span><span class="p">)</span>
 <span class="n">logreg_grid_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="n">training_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 18 candidates, totalling 90 fits
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_validation.py:540: FitFailedWarning: 
-30 fits failed out of a total of 90.
-The score on these train-test partitions for these parameters will be set to nan.
-If these failures are not expected, you can try to debug them by setting error_score=&#39;raise&#39;.
-
-Below are more details about the failures:
---------------------------------------------------------------------------------
-4 fits failed with the following error:
-Traceback (most recent call last):
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_validation.py&quot;, line 888, in _fit_and_score
-    estimator.fit(X_train, y_train, **fit_params)
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 1466, in wrapper
-    estimator._validate_params()
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 666, in _validate_params
-    validate_parameter_constraints(
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\utils\_param_validation.py&quot;, line 95, in validate_parameter_constraints
-    raise InvalidParameterError(
-sklearn.utils._param_validation.InvalidParameterError: The &#39;penalty&#39; parameter of LogisticRegression must be a str among {&#39;l2&#39;, &#39;l1&#39;, &#39;elasticnet&#39;} or None. Got &#39;none&#39; instead.
-
---------------------------------------------------------------------------------
-4 fits failed with the following error:
-Traceback (most recent call last):
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_validation.py&quot;, line 888, in _fit_and_score
-    estimator.fit(X_train, y_train, **fit_params)
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 1466, in wrapper
-    estimator._validate_params()
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 666, in _validate_params
-    validate_parameter_constraints(
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\utils\_param_validation.py&quot;, line 95, in validate_parameter_constraints
-    raise InvalidParameterError(
-sklearn.utils._param_validation.InvalidParameterError: The &#39;penalty&#39; parameter of LogisticRegression must be a str among {&#39;l1&#39;, &#39;l2&#39;, &#39;elasticnet&#39;} or None. Got &#39;none&#39; instead.
-
---------------------------------------------------------------------------------
-2 fits failed with the following error:
-Traceback (most recent call last):
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_validation.py&quot;, line 888, in _fit_and_score
-    estimator.fit(X_train, y_train, **fit_params)
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 1466, in wrapper
-    estimator._validate_params()
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 666, in _validate_params
-    validate_parameter_constraints(
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\utils\_param_validation.py&quot;, line 95, in validate_parameter_constraints
-    raise InvalidParameterError(
-sklearn.utils._param_validation.InvalidParameterError: The &#39;penalty&#39; parameter of LogisticRegression must be a str among {&#39;l1&#39;, &#39;elasticnet&#39;, &#39;l2&#39;} or None. Got &#39;none&#39; instead.
-
---------------------------------------------------------------------------------
-20 fits failed with the following error:
-Traceback (most recent call last):
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_validation.py&quot;, line 888, in _fit_and_score
-    estimator.fit(X_train, y_train, **fit_params)
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 1466, in wrapper
-    estimator._validate_params()
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\base.py&quot;, line 666, in _validate_params
-    validate_parameter_constraints(
-  File &quot;c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\utils\_param_validation.py&quot;, line 95, in validate_parameter_constraints
-    raise InvalidParameterError(
-sklearn.utils._param_validation.InvalidParameterError: The &#39;penalty&#39; parameter of LogisticRegression must be a str among {&#39;elasticnet&#39;, &#39;l2&#39;, &#39;l1&#39;} or None. Got &#39;none&#39; instead.
-
-  warnings.warn(some_fits_failed_message, FitFailedWarning)
-c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\model_selection\_search.py:1103: UserWarning: One or more of the test scores are non-finite: [0.45127593 0.50644129 0.4369693  0.48826891        nan        nan
- 0.49430412 0.57773828 0.47762794 0.56643862        nan        nan
- 0.50286665 0.58639758 0.49875411 0.58451995        nan        nan]
-  warnings.warn(
-c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\linear_model\_sag.py:349: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
 </pre></div>
 </div>
 </div>
@@ -1693,29 +1605,142 @@ c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\linear_mo
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">logreg_results</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results/reglog_results.pkl&quot;</span><span class="p">)</span>
+<span class="n">cv_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">logreg_results</span><span class="p">[</span><span class="s1">&#39;cv_results&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">logreg_results</span><span class="p">[</span><span class="s1">&#39;cv_results&#39;</span><span class="p">])</span>
-
-<span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_penalty&#39;</span><span class="p">,</span>
-                                  <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;param_max_iter&#39;</span><span class="p">,</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_results_df</span><span class="o">.</span><span class="n">columns</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Index([&#39;mean_fit_time&#39;, &#39;std_fit_time&#39;, &#39;mean_score_time&#39;, &#39;std_score_time&#39;,
+       &#39;param_C&#39;, &#39;param_penalty&#39;, &#39;param_solver&#39;, &#39;params&#39;,
+       &#39;split0_test_score&#39;, &#39;split1_test_score&#39;, &#39;split2_test_score&#39;,
+       &#39;split3_test_score&#39;, &#39;split4_test_score&#39;, &#39;mean_test_score&#39;,
+       &#39;std_test_score&#39;, &#39;rank_test_score&#39;],
+      dtype=&#39;object&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_C&#39;</span><span class="p">,</span>
+                                  <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;param_solver&#39;</span><span class="p">,</span>
                                   <span class="n">values</span><span class="o">=</span><span class="s1">&#39;mean_test_score&#39;</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Recall (macro)&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;max_iter&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;solver&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/b085e904b1f83a8267ad299fe63889645e555a0c84a70c52a0c750b210941daa.png" src="../_images/b085e904b1f83a8267ad299fe63889645e555a0c84a70c52a0c750b210941daa.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_penalty&#39;</span><span class="p">,</span>
+                                  <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;param_solver&#39;</span><span class="p">,</span>
+                                  <span class="n">values</span><span class="o">=</span><span class="s1">&#39;mean_test_score&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Recall (macro)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;solver&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;penalty&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/1cdb9ce30d8ee4cabbe8d6a383381cca5ca90e64a7be3f82e09388c0cdf81bb3.png" src="../_images/1cdb9ce30d8ee4cabbe8d6a383381cca5ca90e64a7be3f82e09388c0cdf81bb3.png" />
+<img alt="../_images/068cf2c42f9d71ec08095e459e893417cd7e794fdcbf4c4ac02fae81d3747eb8.png" src="../_images/068cf2c42f9d71ec08095e459e893417cd7e794fdcbf4c4ac02fae81d3747eb8.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">roc_curve</span><span class="p">,</span> <span class="n">auc</span> <span class="c1"># Dejarlo aquí</span>
+
+<span class="n">y_pred_proba</span> <span class="o">=</span> <span class="n">logreg_results</span><span class="p">[</span><span class="s1">&#39;y_pred_prob&#39;</span><span class="p">]</span>
+
+<span class="c1"># Binarización de las clases</span>
+<span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_test</span><span class="p">)</span>
+<span class="n">y_test_bin</span> <span class="o">=</span> <span class="n">label_binarize</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span>
+<span class="n">n_classes</span> <span class="o">=</span> <span class="n">y_test_bin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># Inicialización de diccionarios para almacenar métricas</span>
+<span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">roc_auc</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{},</span> <span class="p">{}</span>
+
+<span class="c1"># Cálculo de las curvas ROC y AUC</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">):</span>
+    <span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test_bin</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">y_pred_proba</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+    <span class="n">roc_auc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">auc</span><span class="p">(</span><span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Clase </span><span class="si">{</span><span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> (AUC = </span><span class="si">{</span><span class="n">roc_auc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+
+<span class="c1"># Gráfica de la línea diagonal (clasificador aleatorio)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Clasificador Aleatorio&#39;</span><span class="p">)</span>
+
+<span class="c1"># Configuración de la gráfica</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Tasa de Falsos Positivos (FPR)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Tasa de Verdaderos Positivos (TPR)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Curvas ROC Multiclase&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower right&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/3338ba5232627e5bb1912d872cf5ecf6cf7b89392350671fbeb044a11f9afa4a.png" src="../_images/3338ba5232627e5bb1912d872cf5ecf6cf7b89392350671fbeb044a11f9afa4a.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Matriz de confusión</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">logreg_results</span><span class="p">[</span><span class="s2">&quot;confusion_matrix&quot;</span><span class="p">],</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Blues&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Matriz de Confusión&quot;</span><span class="p">)</span>    
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Predicción&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Real&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/a60e3512856cfae5044fbdc4b7084dcc11cb9ff89fdfb0ebd1812a70430bbf63.png" src="../_images/a60e3512856cfae5044fbdc4b7084dcc11cb9ff89fdfb0ebd1812a70430bbf63.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reporte de Clasificación:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">logreg_results</span><span class="p">[</span><span class="s2">&quot;classification_report&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Reporte de Clasificación:
+               precision    recall  f1-score   support
+
+         0.0       0.92      0.98      0.95     18118
+         1.0       0.82      0.42      0.55       556
+         2.0       0.66      0.33      0.44      1448
+         3.0       0.58      0.38      0.46       162
+         4.0       0.95      0.88      0.92      1608
+
+    accuracy                           0.91     21892
+   macro avg       0.79      0.60      0.66     21892
+weighted avg       0.90      0.91      0.90     21892
+</pre></div>
+</div>
 </div>
 </div>
 </section>
@@ -1782,6 +1807,140 @@ c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\linear_mo
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rf_results</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results/rf_results.pkl&quot;</span><span class="p">)</span>
+<span class="n">cv_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rf_results</span><span class="p">[</span><span class="s1">&#39;cv_results&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_results_df</span><span class="o">.</span><span class="n">columns</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Index([&#39;mean_fit_time&#39;, &#39;std_fit_time&#39;, &#39;mean_score_time&#39;, &#39;std_score_time&#39;,
+       &#39;param_max_depth&#39;, &#39;param_min_samples_leaf&#39;, &#39;param_n_estimators&#39;,
+       &#39;params&#39;, &#39;split0_test_score&#39;, &#39;split1_test_score&#39;, &#39;split2_test_score&#39;,
+       &#39;split3_test_score&#39;, &#39;split4_test_score&#39;, &#39;mean_test_score&#39;,
+       &#39;std_test_score&#39;, &#39;rank_test_score&#39;],
+      dtype=&#39;object&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_max_depth&#39;</span><span class="p">,</span>
+                                  <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;param_min_samples_leaf&#39;</span><span class="p">,</span>
+                                  <span class="n">values</span><span class="o">=</span><span class="s1">&#39;mean_test_score&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Recall (macro) según n_neighbors y weights&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;weights&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;n_neighbors&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/811138a0895abd43e5a904db33b354b47fb71cc9436e72112948fcefa479bad1.png" src="../_images/811138a0895abd43e5a904db33b354b47fb71cc9436e72112948fcefa479bad1.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_max_depth&#39;</span><span class="p">,</span>
+                                  <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;param_n_estimators&#39;</span><span class="p">,</span>
+                                  <span class="n">values</span><span class="o">=</span><span class="s1">&#39;mean_test_score&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Recall (macro) según n_neighbors y weights&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;weights&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;n_neighbors&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/1209ea11d00a8003a978f81acd5648c29a206a4ad0e9b7acd4e74694a2a9891a.png" src="../_images/1209ea11d00a8003a978f81acd5648c29a206a4ad0e9b7acd4e74694a2a9891a.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">roc_curve</span><span class="p">,</span> <span class="n">auc</span> <span class="c1"># Dejarlo aquí</span>
+
+<span class="n">y_pred_proba</span> <span class="o">=</span> <span class="n">rf_results</span><span class="p">[</span><span class="s1">&#39;y_pred_prob&#39;</span><span class="p">]</span>
+
+<span class="c1"># Binarización de las clases</span>
+<span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_test</span><span class="p">)</span>
+<span class="n">y_test_bin</span> <span class="o">=</span> <span class="n">label_binarize</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span>
+<span class="n">n_classes</span> <span class="o">=</span> <span class="n">y_test_bin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># Inicialización de diccionarios para almacenar métricas</span>
+<span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">roc_auc</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{},</span> <span class="p">{}</span>
+
+<span class="c1"># Cálculo de las curvas ROC y AUC</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">):</span>
+    <span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test_bin</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">y_pred_proba</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+    <span class="n">roc_auc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">auc</span><span class="p">(</span><span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Clase </span><span class="si">{</span><span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> (AUC = </span><span class="si">{</span><span class="n">roc_auc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+
+<span class="c1"># Gráfica de la línea diagonal (clasificador aleatorio)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Clasificador Aleatorio&#39;</span><span class="p">)</span>
+
+<span class="c1"># Configuración de la gráfica</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Tasa de Falsos Positivos (FPR)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Tasa de Verdaderos Positivos (TPR)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Curvas ROC Multiclase&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower right&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/4ffda37ab03480bdd7b764e295bc32c38c31493d8ab5c0ec10c5c4b83f8d3722.png" src="../_images/4ffda37ab03480bdd7b764e295bc32c38c31493d8ab5c0ec10c5c4b83f8d3722.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Matriz de confusión</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">rf_results</span><span class="p">[</span><span class="s2">&quot;confusion_matrix&quot;</span><span class="p">],</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Blues&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Matriz de Confusión&quot;</span><span class="p">)</span>    
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Predicción&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Real&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/e2e72d7f2251e92604bb5f8610f3885e40a13fa65bc6cdc74db9fe44946a216f.png" src="../_images/e2e72d7f2251e92604bb5f8610f3885e40a13fa65bc6cdc74db9fe44946a216f.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reporte de Clasificación:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">rf_results</span><span class="p">[</span><span class="s2">&quot;classification_report&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Reporte de Clasificación:
+               precision    recall  f1-score   support
+
+         0.0       0.97      1.00      0.99     18118
+         1.0       0.98      0.61      0.75       556
+         2.0       0.98      0.88      0.93      1448
+         3.0       0.88      0.63      0.73       162
+         4.0       0.99      0.95      0.97      1608
+
+    accuracy                           0.97     21892
+   macro avg       0.96      0.81      0.87     21892
+weighted avg       0.97      0.97      0.97     21892
 </pre></div>
 </div>
 </div>
@@ -1803,7 +1962,7 @@ c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\linear_mo
     <span class="s1">&#39;tree_method&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span> <span class="s1">&#39;approx&#39;</span><span class="p">],</span>
     <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
     <span class="c1">#&#39;early_stopping_rounds&#39;: [10, 20],</span>
-    <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> 
+    <span class="c1">#&#39;max_depth&#39;: [3, 6], </span>
     <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="mi">200</span><span class="p">,</span><span class="mi">400</span><span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
@@ -1831,9 +1990,9 @@ c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\linear_mo
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 36 candidates, totalling 180 fits
-[09:31:21] INFO: C:\actions-runner\_work\xgboost\xgboost\src\data\iterative_dmatrix.cc:53: Finished constructing the `IterativeDMatrix`: (87554, 187, 16372598).
-[09:31:21] INFO: C:\actions-runner\_work\xgboost\xgboost\src\data\ellpack_page.cu:167: Ellpack is dense.
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 18 candidates, totalling 90 fits
+[05:41:57] INFO: C:\actions-runner\_work\xgboost\xgboost\src\data\iterative_dmatrix.cc:53: Finished constructing the `IterativeDMatrix`: (87554, 187, 16372598).
+[05:41:57] INFO: C:\actions-runner\_work\xgboost\xgboost\src\data\ellpack_page.cu:167: Ellpack is dense.
 </pre></div>
 </div>
 </div>
@@ -1851,7 +2010,7 @@ c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\linear_mo
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\xgboost\core.py:729: UserWarning: [09:31:37] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\common\error_msg.cc:58: Falling back to prediction using DMatrix due to mismatched devices. This might lead to higher memory usage and slower performance. XGBoost is running on: cuda:0, while the input data is on: cpu.
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\xgboost\core.py:729: UserWarning: [05:42:13] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\common\error_msg.cc:58: Falling back to prediction using DMatrix due to mismatched devices. This might lead to higher memory usage and slower performance. XGBoost is running on: cuda:0, while the input data is on: cpu.
 Potential solutions:
 - Use a data structure that matches the device ordinal in the booster.
 - Set the device for booster before call to inplace_predict.
@@ -1872,15 +2031,14 @@ This warning will only be shown once.
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xgb_results</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results/xgb_results.pkl&quot;</span><span class="p">)</span>
+<span class="n">cv_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">xgb_results</span><span class="p">[</span><span class="s1">&#39;cv_results&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">xgb_results</span><span class="p">[</span><span class="s1">&#39;cv_results&#39;</span><span class="p">])</span>
-
-<span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_learning_rate&#39;</span><span class="p">,</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_learning_rate&#39;</span><span class="p">,</span>
                                   <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;param_n_estimators&#39;</span><span class="p">,</span>
                                   <span class="n">values</span><span class="o">=</span><span class="s1">&#39;mean_test_score&#39;</span><span class="p">)</span>
 
@@ -1894,7 +2052,7 @@ This warning will only be shown once.
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/f2b184a76946379469fea9a030d8ae46954013262d24161d431333677a380931.png" src="../_images/f2b184a76946379469fea9a030d8ae46954013262d24161d431333677a380931.png" />
+<img alt="../_images/7415ff97cecac88d9aa3acaaaa062167db07d1351ca063904cb9c55c055a6a38.png" src="../_images/7415ff97cecac88d9aa3acaaaa062167db07d1351ca063904cb9c55c055a6a38.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -1933,7 +2091,7 @@ This warning will only be shown once.
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/ebc74c24bd9a2bd73a44a11ec0736b621ee5401933a756c046e65871ca45106d.png" src="../_images/ebc74c24bd9a2bd73a44a11ec0736b621ee5401933a756c046e65871ca45106d.png" />
+<img alt="../_images/e6a7599ee6d09dbc0886514bfa76c14278cd739d0efc583817cba619e5136714.png" src="../_images/e6a7599ee6d09dbc0886514bfa76c14278cd739d0efc583817cba619e5136714.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -1949,7 +2107,7 @@ This warning will only be shown once.
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/95fb3ae46a4592205de24a4d4c949537418409d739586d660302eccd250f33ff.png" src="../_images/95fb3ae46a4592205de24a4d4c949537418409d739586d660302eccd250f33ff.png" />
+<img alt="../_images/bf82be50acb4f32dd4ea9e8b0b633e6c81238ca9357ce95ca91fb93dbf2154d5.png" src="../_images/bf82be50acb4f32dd4ea9e8b0b633e6c81238ca9357ce95ca91fb93dbf2154d5.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -1962,27 +2120,27 @@ This warning will only be shown once.
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Reporte de Clasificación:
                precision    recall  f1-score   support
 
-         0.0       0.96      1.00      0.98     18118
-         1.0       0.98      0.54      0.70       556
-         2.0       0.96      0.80      0.87      1448
-         3.0       0.79      0.41      0.54       162
-         4.0       0.99      0.91      0.95      1608
+         0.0       0.98      1.00      0.99     18118
+         1.0       0.96      0.71      0.81       556
+         2.0       0.98      0.93      0.95      1448
+         3.0       0.88      0.75      0.81       162
+         4.0       0.99      0.98      0.98      1608
 
-    accuracy                           0.96     21892
-   macro avg       0.93      0.73      0.81     21892
-weighted avg       0.96      0.96      0.96     21892
+    accuracy                           0.98     21892
+   macro avg       0.96      0.87      0.91     21892
+weighted avg       0.98      0.98      0.98     21892
 </pre></div>
 </div>
 </div>
 </div>
 </section>
 </section>
-<section id="svm">
-<h3>SVM<a class="headerlink" href="#svm" title="Link to this heading">#</a></h3>
+<section id="linearsvm">
+<h3>LinearSVM<a class="headerlink" href="#linearsvm" title="Link to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Libraies for SVM</span>
-<span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVC</span>
+<span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">LinearSVC</span>
 </pre></div>
 </div>
 </div>
@@ -1990,24 +2148,768 @@ weighted avg       0.96      0.96      0.96     21892
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set hyperparameters</span>
-<span class="n">kernel</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
-<span class="n">C</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="n">gamma</span> <span class="o">=</span> <span class="s1">&#39;scale&#39;</span>
-<span class="c1">#TRY: kernel, parámetro C y el parámetro gamma</span>
+<span class="n">linear_svc_param_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">],</span>
+    <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="s1">&#39;l2&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;max_iter&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">]</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">linear_svm</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Modelo LinearSVC</span>
+<span class="n">svc_model</span> <span class="o">=</span> <span class="n">LinearSVC</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span> <span class="n">dual</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># GridSearchCV para LinearSVC</span>
+<span class="n">svc_grid_search</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+    <span class="n">svc_model</span><span class="p">,</span>
+    <span class="n">param_grid</span><span class="o">=</span><span class="n">linear_svc_param_grid</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="n">scorer</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+    <span class="n">refit</span><span class="o">=</span><span class="n">refit</span>
+<span class="p">)</span>
+
+<span class="c1"># Entrenamiento y ajuste del modelo</span>
+<span class="n">start_time_svc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">svc_grid_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">training_time_svc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time_svc</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 12 candidates, totalling 60 fits
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">svc_model_name</span> <span class="o">=</span> <span class="s2">&quot;linear_svc&quot;</span>
+
+<span class="c1"># Evaluación y guardado del modelo</span>
+<span class="n">evaluate_and_save_model</span><span class="p">(</span><span class="n">svc_grid_search</span><span class="p">,</span> <span class="n">svc_model_name</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">training_time_svc</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Modelo y resultados guardados exitosamente en &#39;models/best_linear_svc_model.pkl&#39; y &#39;results/linear_svc_results.pkl&#39;.
+</pre></div>
+</div>
+</div>
+</div>
+<section id="id15">
+<h4>Análisis de resultados generales y test<a class="headerlink" href="#id15" title="Link to this heading">#</a></h4>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">linear_svc_results</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results/linear_svc_results.pkl&quot;</span><span class="p">)</span>
+<span class="n">cv_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">linear_svc_results</span><span class="p">[</span><span class="s1">&#39;cv_results&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_results_df</span><span class="o">.</span><span class="n">columns</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Index([&#39;mean_fit_time&#39;, &#39;std_fit_time&#39;, &#39;mean_score_time&#39;, &#39;std_score_time&#39;,
+       &#39;param_C&#39;, &#39;param_max_iter&#39;, &#39;param_penalty&#39;, &#39;params&#39;,
+       &#39;split0_test_score&#39;, &#39;split1_test_score&#39;, &#39;split2_test_score&#39;,
+       &#39;split3_test_score&#39;, &#39;split4_test_score&#39;, &#39;mean_test_score&#39;,
+       &#39;std_test_score&#39;, &#39;rank_test_score&#39;],
+      dtype=&#39;object&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_C&#39;</span><span class="p">,</span>
+                                  <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;param_penalty&#39;</span><span class="p">,</span>
+                                  <span class="n">values</span><span class="o">=</span><span class="s1">&#39;mean_test_score&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Recall (macro) según:&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Penalty&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/02cc4ffd58fcb9e1367d60aaf4811d1201a9d27f3533e8e4a69bb42b87b587b7.png" src="../_images/02cc4ffd58fcb9e1367d60aaf4811d1201a9d27f3533e8e4a69bb42b87b587b7.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">roc_curve</span><span class="p">,</span> <span class="n">auc</span> <span class="c1"># Dejarlo aquí</span>
+
+<span class="n">y_pred_proba</span> <span class="o">=</span> <span class="n">linear_svc_results</span><span class="p">[</span><span class="s1">&#39;y_pred_prob&#39;</span><span class="p">]</span>
+
+<span class="c1"># Binarización de las clases</span>
+<span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_test</span><span class="p">)</span>
+<span class="n">y_test_bin</span> <span class="o">=</span> <span class="n">label_binarize</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span>
+<span class="n">n_classes</span> <span class="o">=</span> <span class="n">y_test_bin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># Inicialización de diccionarios para almacenar métricas</span>
+<span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">roc_auc</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{},</span> <span class="p">{}</span>
+
+<span class="c1"># Cálculo de las curvas ROC y AUC</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">):</span>
+    <span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test_bin</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">y_pred_proba</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+    <span class="n">roc_auc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">auc</span><span class="p">(</span><span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Clase </span><span class="si">{</span><span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> (AUC = </span><span class="si">{</span><span class="n">roc_auc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+
+<span class="c1"># Gráfica de la línea diagonal (clasificador aleatorio)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Clasificador Aleatorio&#39;</span><span class="p">)</span>
+
+<span class="c1"># Configuración de la gráfica</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Tasa de Falsos Positivos (FPR)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Tasa de Verdaderos Positivos (TPR)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Curvas ROC Multiclase&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower right&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/d19283f4b808573a9880f7af501b3f3b8aeca7a3b6fd0f61dd89bcfbb93fd38a.png" src="../_images/d19283f4b808573a9880f7af501b3f3b8aeca7a3b6fd0f61dd89bcfbb93fd38a.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Matriz de confusión</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">linear_svc_results</span><span class="p">[</span><span class="s2">&quot;confusion_matrix&quot;</span><span class="p">],</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Blues&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Matriz de Confusión&quot;</span><span class="p">)</span>    
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Predicción&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Real&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/c1f7d51a168ef2db52961768dae4729458434e8a3ca22ce6796e0bee23e8c68e.png" src="../_images/c1f7d51a168ef2db52961768dae4729458434e8a3ca22ce6796e0bee23e8c68e.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reporte de Clasificación:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">linear_svc_results</span><span class="p">[</span><span class="s2">&quot;classification_report&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Reporte de Clasificación:
+               precision    recall  f1-score   support
+
+         0.0       0.91      0.99      0.95     18118
+         1.0       0.71      0.13      0.22       556
+         2.0       0.68      0.27      0.39      1448
+         3.0       1.00      0.06      0.11       162
+         4.0       0.97      0.87      0.91      1608
+
+    accuracy                           0.90     21892
+   macro avg       0.85      0.46      0.51     21892
+weighted avg       0.89      0.90      0.88     21892
 </pre></div>
 </div>
 </div>
 </div>
 </section>
-<section id="mlp">
-<h3>MLP<a class="headerlink" href="#mlp" title="Link to this heading">#</a></h3>
+</section>
+<section id="svm-svc">
+<h3>SVM (SVC)<a class="headerlink" href="#svm-svc" title="Link to this heading">#</a></h3>
+<section id="definir-los-hiperparametros">
+<h4>Definir los hiperparámetros<a class="headerlink" href="#definir-los-hiperparametros" title="Link to this heading">#</a></h4>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVC</span>
+
+<span class="c1"># Parámetros para SVC</span>
+<span class="n">svc_param_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">10.</span><span class="p">],</span>
+    <span class="s1">&#39;kernel&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;rbf&#39;</span><span class="p">],</span>
+    <span class="c1">#&#39;gamma&#39;: [&#39;scale&#39;, &#39;auto&#39;]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Modelo SVC</span>
+<span class="n">svc_model</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span> <span class="n">probability</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># GridSearchCV para SVC</span>
+<span class="n">svc_grid_search</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+    <span class="n">svc_model</span><span class="p">,</span>
+    <span class="n">param_grid</span><span class="o">=</span><span class="n">svc_param_grid</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="n">scorer</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+    <span class="n">refit</span><span class="o">=</span><span class="n">refit</span>
+<span class="p">)</span>
+
+<span class="c1"># Entrenamiento y ajuste del modelo</span>
+<span class="n">start_time_svc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">svc_grid_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">training_time_svc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time_svc</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 6 candidates, totalling 30 fits
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Nombre del modelo</span>
+<span class="n">svc_model_name</span> <span class="o">=</span> <span class="s2">&quot;svc&quot;</span>
+
+<span class="c1"># Evaluación y guardado del modelo</span>
+<span class="n">evaluate_and_save_model</span><span class="p">(</span><span class="n">svc_grid_search</span><span class="p">,</span> <span class="n">svc_model_name</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">training_time_svc</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Modelo y resultados guardados exitosamente en &#39;models/best_svc_model.pkl&#39; y &#39;results/svc_results.pkl&#39;.
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="id16">
+<h4>Análisis de resultados generales y test<a class="headerlink" href="#id16" title="Link to this heading">#</a></h4>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">svc_results</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results/svc_results.pkl&quot;</span><span class="p">)</span>
+<span class="n">cv_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">svc_results</span><span class="p">[</span><span class="s1">&#39;cv_results&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_results_df</span><span class="o">.</span><span class="n">columns</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Index([&#39;mean_fit_time&#39;, &#39;std_fit_time&#39;, &#39;mean_score_time&#39;, &#39;std_score_time&#39;,
+       &#39;param_C&#39;, &#39;param_kernel&#39;, &#39;params&#39;, &#39;split0_test_score&#39;,
+       &#39;split1_test_score&#39;, &#39;split2_test_score&#39;, &#39;split3_test_score&#39;,
+       &#39;split4_test_score&#39;, &#39;mean_test_score&#39;, &#39;std_test_score&#39;,
+       &#39;rank_test_score&#39;],
+      dtype=&#39;object&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_C&#39;</span><span class="p">,</span> 
+                                  <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;param_kernel&#39;</span><span class="p">,</span> 
+                                  <span class="n">values</span><span class="o">=</span><span class="s1">&#39;mean_test_score&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Recall (macro)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;kernel&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/95ccec968db4818955278af5174b7b59249fb797a1cc27839f99f8d0f4188b75.png" src="../_images/95ccec968db4818955278af5174b7b59249fb797a1cc27839f99f8d0f4188b75.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">roc_curve</span><span class="p">,</span> <span class="n">auc</span> <span class="c1"># Dejarlo aquí</span>
+
+<span class="n">y_pred_proba</span> <span class="o">=</span> <span class="n">svc_results</span><span class="p">[</span><span class="s1">&#39;y_pred_prob&#39;</span><span class="p">]</span>
+
+<span class="c1"># Binarización de las clases</span>
+<span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_test</span><span class="p">)</span>
+<span class="n">y_test_bin</span> <span class="o">=</span> <span class="n">label_binarize</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span>
+<span class="n">n_classes</span> <span class="o">=</span> <span class="n">y_test_bin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># Inicialización de diccionarios para almacenar métricas</span>
+<span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">roc_auc</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{},</span> <span class="p">{}</span>
+
+<span class="c1"># Cálculo de las curvas ROC y AUC</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">):</span>
+    <span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test_bin</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">y_pred_proba</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+    <span class="n">roc_auc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">auc</span><span class="p">(</span><span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Clase </span><span class="si">{</span><span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> (AUC = </span><span class="si">{</span><span class="n">roc_auc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+
+<span class="c1"># Gráfica de la línea diagonal (clasificador aleatorio)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Clasificador Aleatorio&#39;</span><span class="p">)</span>
+
+<span class="c1"># Configuración de la gráfica</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Tasa de Falsos Positivos (FPR)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Tasa de Verdaderos Positivos (TPR)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Curvas ROC Multiclase&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower right&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/44b340511743332341ca9effc3ca2a23bbbd46bddb97c3cf2fcb1f94a27d3124.png" src="../_images/44b340511743332341ca9effc3ca2a23bbbd46bddb97c3cf2fcb1f94a27d3124.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Matriz de confusión</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">svc_results</span><span class="p">[</span><span class="s2">&quot;confusion_matrix&quot;</span><span class="p">],</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Blues&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Matriz de Confusión&quot;</span><span class="p">)</span>    
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Predicción&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Real&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/600ae762abf644566652fe70a378ba43d789e77d159501f6d995e169b1cae7d5.png" src="../_images/600ae762abf644566652fe70a378ba43d789e77d159501f6d995e169b1cae7d5.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reporte de Clasificación:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">svc_results</span><span class="p">[</span><span class="s2">&quot;classification_report&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Reporte de Clasificación:
+               precision    recall  f1-score   support
+
+         0.0       0.98      1.00      0.99     18118
+         1.0       0.96      0.61      0.75       556
+         2.0       0.96      0.92      0.94      1448
+         3.0       0.82      0.57      0.68       162
+         4.0       0.99      0.97      0.98      1608
+
+    accuracy                           0.98     21892
+   macro avg       0.94      0.81      0.87     21892
+weighted avg       0.98      0.98      0.98     21892
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">svc_results</span><span class="p">[</span><span class="s2">&quot;cv_results&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;rank_test_score&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean_fit_time</th>
+      <th>std_fit_time</th>
+      <th>mean_score_time</th>
+      <th>std_score_time</th>
+      <th>param_C</th>
+      <th>param_kernel</th>
+      <th>params</th>
+      <th>split0_test_score</th>
+      <th>split1_test_score</th>
+      <th>split2_test_score</th>
+      <th>split3_test_score</th>
+      <th>split4_test_score</th>
+      <th>mean_test_score</th>
+      <th>std_test_score</th>
+      <th>rank_test_score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>5</th>
+      <td>2233.969802</td>
+      <td>436.758923</td>
+      <td>67.022623</td>
+      <td>57.874770</td>
+      <td>10.0</td>
+      <td>rbf</td>
+      <td>{'C': 10.0, 'kernel': 'rbf'}</td>
+      <td>0.832433</td>
+      <td>0.843225</td>
+      <td>0.835353</td>
+      <td>0.837872</td>
+      <td>0.820227</td>
+      <td>0.833822</td>
+      <td>0.007667</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2767.927592</td>
+      <td>397.387533</td>
+      <td>114.976649</td>
+      <td>101.671240</td>
+      <td>1.0</td>
+      <td>rbf</td>
+      <td>{'C': 1.0, 'kernel': 'rbf'}</td>
+      <td>0.754018</td>
+      <td>0.764739</td>
+      <td>0.764034</td>
+      <td>0.763727</td>
+      <td>0.750244</td>
+      <td>0.759352</td>
+      <td>0.006025</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>4396.757558</td>
+      <td>528.677218</td>
+      <td>172.372242</td>
+      <td>150.589776</td>
+      <td>0.1</td>
+      <td>rbf</td>
+      <td>{'C': 0.1, 'kernel': 'rbf'}</td>
+      <td>0.605936</td>
+      <td>0.618103</td>
+      <td>0.614637</td>
+      <td>0.622205</td>
+      <td>0.619712</td>
+      <td>0.616119</td>
+      <td>0.005653</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>8877.127614</td>
+      <td>610.550724</td>
+      <td>35.011635</td>
+      <td>7.983089</td>
+      <td>10.0</td>
+      <td>linear</td>
+      <td>{'C': 10.0, 'kernel': 'linear'}</td>
+      <td>0.572580</td>
+      <td>0.599484</td>
+      <td>0.600848</td>
+      <td>0.615721</td>
+      <td>0.600032</td>
+      <td>0.597733</td>
+      <td>0.013959</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>5552.381414</td>
+      <td>108.362752</td>
+      <td>79.070506</td>
+      <td>4.659726</td>
+      <td>1.0</td>
+      <td>linear</td>
+      <td>{'C': 1.0, 'kernel': 'linear'}</td>
+      <td>0.555127</td>
+      <td>0.574629</td>
+      <td>0.582190</td>
+      <td>0.589673</td>
+      <td>0.581227</td>
+      <td>0.576569</td>
+      <td>0.011735</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>4864.826110</td>
+      <td>34.544831</td>
+      <td>96.425620</td>
+      <td>4.032074</td>
+      <td>0.1</td>
+      <td>linear</td>
+      <td>{'C': 0.1, 'kernel': 'linear'}</td>
+      <td>0.457985</td>
+      <td>0.459231</td>
+      <td>0.463721</td>
+      <td>0.461604</td>
+      <td>0.459738</td>
+      <td>0.460456</td>
+      <td>0.002005</td>
+      <td>6</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+</section>
+<section id="mlp-sklearn">
+<h3>MLP (sklearn)<a class="headerlink" href="#mlp-sklearn" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.neural_network</span> <span class="kn">import</span> <span class="n">MLPClassifier</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set hyperparameters</span>
+<span class="n">mlp_param_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;hidden_layer_sizes&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="mi">50</span><span class="p">,),</span> <span class="p">(</span><span class="mi">100</span><span class="p">,),</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">)],</span>
+    <span class="s1">&#39;activation&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;logistic&#39;</span><span class="p">,</span> <span class="s1">&#39;tanh&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;solver&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;adam&#39;</span><span class="p">,</span> <span class="s1">&#39;sgd&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0001</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">],</span>
+    <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="s1">&#39;adaptive&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;max_iter&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">200</span><span class="p">,</span> <span class="mi">500</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Modelo MLPClassifier</span>
+<span class="n">mlp_model</span> <span class="o">=</span> <span class="n">MLPClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+
+<span class="c1"># GridSearchCV para MLPClassifier</span>
+<span class="n">mlp_grid_search</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+    <span class="n">mlp_model</span><span class="p">,</span>
+    <span class="n">param_grid</span><span class="o">=</span><span class="n">mlp_param_grid</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="n">scorer</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+    <span class="n">refit</span><span class="o">=</span><span class="n">refit</span>
+<span class="p">)</span>
+
+<span class="c1"># Entrenamiento y ajuste del modelo</span>
+<span class="n">start_time_mlp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">mlp_grid_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">training_time_mlp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time_mlp</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fitting 5 folds for each of 96 candidates, totalling 480 fits
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>c:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\sklearn\neural_network\_multilayer_perceptron.py:690: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (200) reached and the optimization hasn&#39;t converged yet.
+  warnings.warn(
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Nombre del modelo</span>
+<span class="n">mlp_model_name</span> <span class="o">=</span> <span class="s2">&quot;mlp&quot;</span>
+
+<span class="c1"># Evaluación y guardado del modelo</span>
+<span class="n">evaluate_and_save_model</span><span class="p">(</span><span class="n">mlp_grid_search</span><span class="p">,</span> <span class="n">mlp_model_name</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">training_time_mlp</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Modelo y resultados guardados exitosamente en &#39;models/best_mlp_model.pkl&#39; y &#39;results/mlp_results.pkl&#39;.
+</pre></div>
+</div>
+</div>
+</div>
+<section id="id17">
+<h4>Análisis de resultados generales y test<a class="headerlink" href="#id17" title="Link to this heading">#</a></h4>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mlp_results</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results/mlp_results.pkl&quot;</span><span class="p">)</span>
+<span class="n">cv_results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">mlp_results</span><span class="p">[</span><span class="s1">&#39;cv_results&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cv_results_df</span><span class="o">.</span><span class="n">columns</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Index([&#39;mean_fit_time&#39;, &#39;std_fit_time&#39;, &#39;mean_score_time&#39;, &#39;std_score_time&#39;,
+       &#39;param_activation&#39;, &#39;param_alpha&#39;, &#39;param_hidden_layer_sizes&#39;,
+       &#39;param_learning_rate&#39;, &#39;param_max_iter&#39;, &#39;param_solver&#39;, &#39;params&#39;,
+       &#39;split0_test_score&#39;, &#39;split1_test_score&#39;, &#39;split2_test_score&#39;,
+       &#39;split3_test_score&#39;, &#39;split4_test_score&#39;, &#39;mean_test_score&#39;,
+       &#39;std_test_score&#39;, &#39;rank_test_score&#39;],
+      dtype=&#39;object&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pivot</span> <span class="o">=</span> <span class="n">cv_results_df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;param_hidden_layer_sizes&#39;</span><span class="p">,</span>
+                                  <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;param_learning_rate&#39;</span><span class="p">,</span>
+                                  <span class="n">values</span><span class="o">=</span><span class="s1">&#39;mean_test_score&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">pivot</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Recall (macro)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;weights&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;algorithm&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/59daffbf6a16b27d1ff64ad82ca6f1f4cbf4ad0d8367655216a259bae0b0fe62.png" src="../_images/59daffbf6a16b27d1ff64ad82ca6f1f4cbf4ad0d8367655216a259bae0b0fe62.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">roc_curve</span><span class="p">,</span> <span class="n">auc</span> <span class="c1"># Dejarlo aquí</span>
+
+<span class="n">y_pred_proba</span> <span class="o">=</span> <span class="n">mlp_results</span><span class="p">[</span><span class="s1">&#39;y_pred_prob&#39;</span><span class="p">]</span>
+
+<span class="c1"># Binarización de las clases</span>
+<span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_test</span><span class="p">)</span>
+<span class="n">y_test_bin</span> <span class="o">=</span> <span class="n">label_binarize</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span>
+<span class="n">n_classes</span> <span class="o">=</span> <span class="n">y_test_bin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># Inicialización de diccionarios para almacenar métricas</span>
+<span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">roc_auc</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{},</span> <span class="p">{}</span>
+
+<span class="c1"># Cálculo de las curvas ROC y AUC</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">):</span>
+    <span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test_bin</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">y_pred_proba</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+    <span class="n">roc_auc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">auc</span><span class="p">(</span><span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tpr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Clase </span><span class="si">{</span><span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> (AUC = </span><span class="si">{</span><span class="n">roc_auc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+
+<span class="c1"># Gráfica de la línea diagonal (clasificador aleatorio)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Clasificador Aleatorio&#39;</span><span class="p">)</span>
+
+<span class="c1"># Configuración de la gráfica</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Tasa de Falsos Positivos (FPR)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Tasa de Verdaderos Positivos (TPR)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Curvas ROC Multiclase&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower right&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/c7845487d7415a9429411593487cfc81e2d150f49628c55a196e4d0f1ed2414d.png" src="../_images/c7845487d7415a9429411593487cfc81e2d150f49628c55a196e4d0f1ed2414d.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Matriz de confusión</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">mlp_results</span><span class="p">[</span><span class="s2">&quot;confusion_matrix&quot;</span><span class="p">],</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Blues&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Matriz de Confusión&quot;</span><span class="p">)</span>    
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Predicción&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Real&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/2a9b9e8472f36d699bcb41065081d44dd37fc39cb0024cd1642f20cb8fa1f9d3.png" src="../_images/2a9b9e8472f36d699bcb41065081d44dd37fc39cb0024cd1642f20cb8fa1f9d3.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reporte de Clasificación:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">mlp_results</span><span class="p">[</span><span class="s2">&quot;classification_report&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Reporte de Clasificación:
+               precision    recall  f1-score   support
+
+         0.0       0.99      0.99      0.99     18118
+         1.0       0.80      0.74      0.77       556
+         2.0       0.95      0.94      0.94      1448
+         3.0       0.81      0.77      0.79       162
+         4.0       0.98      0.98      0.98      1608
+
+    accuracy                           0.98     21892
+   macro avg       0.90      0.88      0.89     21892
+weighted avg       0.98      0.98      0.98     21892
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="configuracion-para-los-modelos-con-gpu">
+<h3>Configuración para los modelos con GPU<a class="headerlink" href="#configuracion-para-los-modelos-con-gpu" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Liberías para todos los modelos con GPU</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">keras_tuner</span> <span class="k">as</span> <span class="nn">kt</span>
+<span class="kn">from</span> <span class="nn">tensorflow</span> <span class="kn">import</span> <span class="n">keras</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras</span> <span class="kn">import</span> <span class="n">layers</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.utils</span> <span class="kn">import</span> <span class="n">to_categorical</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.layers</span> <span class="kn">import</span> <span class="n">Dropout</span><span class="p">,</span> <span class="n">Dense</span>
+
+<span class="n">device_name</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">list_physical_devices</span><span class="p">(</span><span class="s1">&#39;GPU&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Usando </span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Usando [PhysicalDevice(name=&#39;/physical_device:GPU:0&#39;, device_type=&#39;GPU&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+<section id="crearcion-de-tensores">
+<h4>Crearción de tensores<a class="headerlink" href="#crearcion-de-tensores" title="Link to this heading">#</a></h4>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X_train_np</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+<span class="n">X_test_np</span> <span class="o">=</span> <span class="n">X_test</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+<span class="n">num_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_train</span><span class="p">))</span>  <span class="c1"># Número de clases en el dataset</span>
+<span class="n">y_train_cat</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">num_classes</span><span class="p">)</span>
+<span class="n">y_test_cat</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">num_classes</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 </section>
 <section id="comparacion-de-resultados-de-todos-los-modelos">
@@ -2039,10 +2941,13 @@ weighted avg       0.96      0.96      0.96     21892
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Resumen de Resultados Completos:
           0
 0  0.868556
-1  0.577764
-2  0.813500
-3  0.670174
-4  0.731074
+1  0.461934
+2  0.883581
+3  0.598089
+4  0.812568
+5  0.814131
+6  0.823717
+7  0.871120
 </pre></div>
 </div>
 </div>
@@ -2142,8 +3047,23 @@ weighted avg       0.96      0.96      0.96     21892
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id14">Análisis de resultados generales y test</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#svm">SVM</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mlp">MLP</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#linearsvm">LinearSVM</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id15">Análisis de resultados generales y test</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#svm-svc">SVM (SVC)</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#definir-los-hiperparametros">Definir los hiperparámetros</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id16">Análisis de resultados generales y test</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mlp-sklearn">MLP (sklearn)</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id17">Análisis de resultados generales y test</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configuracion-para-los-modelos-con-gpu">Configuración para los modelos con GPU</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crearcion-de-tensores">Crearción de tensores</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparacion-de-resultados-de-todos-los-modelos">Comparación de resultados de todos los modelos</a></li>
