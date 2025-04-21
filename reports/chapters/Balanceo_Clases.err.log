@@ -1,0 +1,64 @@
+Traceback (most recent call last):
+  File "C:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\jupyter_cache\executors\utils.py", line 58, in single_nb_execution
+    executenb(
+  File "C:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\nbclient\client.py", line 1314, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+  File "C:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\jupyter_core\utils\__init__.py", line 165, in wrapped
+    return loop.run_until_complete(inner)
+  File "C:\Users\luisl\anaconda3\envs\practical-exam\lib\asyncio\base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "C:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\nbclient\client.py", line 709, in async_execute
+    await self.async_execute_cell(
+  File "C:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\nbclient\client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "C:\Users\luisl\anaconda3\envs\practical-exam\lib\site-packages\nbclient\client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+# 📦 Librerías estándar
+import os
+import time
+import joblib
+import numpy as np
+import pandas as pd
+
+# 📊 Visualización
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# ⚙️ Preprocesamiento y modelado
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler, label_binarize
+from sklearn.pipeline import Pipeline
+
+# 🤖 Modelos
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+
+# 📈 Métricas de evaluación
+from sklearn.metrics import (
+    confusion_matrix, classification_report, precision_score,
+    recall_score, accuracy_score, f1_score, roc_auc_score
+)
+
+# ⚖️ Técnicas de balanceo
+from imblearn.over_sampling import SMOTE, ADASYN
+from imblearn.under_sampling import RandomUnderSampler
+
+------------------
+
+
+[1;31m---------------------------------------------------------------------------[0m
+[1;31mModuleNotFoundError[0m                       Traceback (most recent call last)
+Cell [1;32mIn[1], line 29[0m
+[0;32m     23[0m [38;5;28;01mfrom[39;00m [38;5;21;01msklearn[39;00m[38;5;21;01m.[39;00m[38;5;21;01mmetrics[39;00m [38;5;28;01mimport[39;00m (
+[0;32m     24[0m     confusion_matrix, classification_report, precision_score,
+[0;32m     25[0m     recall_score, accuracy_score, f1_score, roc_auc_score
+[0;32m     26[0m )
+[0;32m     28[0m [38;5;66;03m# ⚖️ Técnicas de balanceo[39;00m
+[1;32m---> 29[0m [38;5;28;01mfrom[39;00m [38;5;21;01mimblearn[39;00m[38;5;21;01m.[39;00m[38;5;21;01mover_sampling[39;00m [38;5;28;01mimport[39;00m SMOTE, ADASYN
+[0;32m     30[0m [38;5;28;01mfrom[39;00m [38;5;21;01mimblearn[39;00m[38;5;21;01m.[39;00m[38;5;21;01munder_sampling[39;00m [38;5;28;01mimport[39;00m RandomUnderSampler
+
+[1;31mModuleNotFoundError[0m: No module named 'imblearn'
+
